@@ -121,7 +121,7 @@ class SettingsScreen extends StatelessWidget {
             description: S.of(context).roadsterDescription,
             icon: Icons.rocket_launch,
             onClick: () {
-              NavigationService.of(context).navigateTo(Routes.roadster);
+              // Navigation to roadster removed (route deleted)
             },
           ),
           SettingItem(

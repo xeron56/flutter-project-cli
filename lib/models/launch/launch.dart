@@ -1,4 +1,4 @@
-export '../rocket/rocket_resource.dart';
+
 export '../stage/first_stage_ext.dart';
 export '../stage/first_stage_resource.dart';
 export '../stage/second_stage_ext.dart';
