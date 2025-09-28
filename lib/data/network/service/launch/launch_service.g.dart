@@ -2,6 +2,8 @@
 
 part of 'launch_service.dart';
 
+// dart format off
+
 // **************************************************************************
 // RetrofitGenerator
 // **************************************************************************
@@ -120,3 +122,5 @@ class _LaunchService implements LaunchService {
     return Uri.parse(dioBaseUrl).resolveUri(url).toString();
   }
 }
+
+// dart format on
