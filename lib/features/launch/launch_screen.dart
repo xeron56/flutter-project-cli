@@ -17,21 +17,27 @@ import 'package:flutter_bloc_app_template/generated/l10n.dart';
 import 'package:flutter_bloc_app_template/index.dart';
 
 class LaunchScreen extends StatelessWidget {
-  const LaunchScreen({super.key});
+  const LaunchScreen({super.key, this.flightNumber});
+
+  final int? flightNumber;
 
   @override
   Widget build(BuildContext context) {
-    final launch = ModalRoute.of(context)?.settings.arguments as LaunchResource;
+    // Get flightNumber from constructor, route arguments, or default to 1
+    final argumentsData = ModalRoute.of(context)?.settings.arguments;
+    final flightNum = flightNumber ??
+        (argumentsData is LaunchResource ? argumentsData.flightNumber : null) ??
+        1;
 
     return BlocProvider(
       create: (context) => LaunchBloc(
         RepositoryProvider.of<LaunchesRepository>(context),
       )..add(
           LaunchLoadEvent(
-            flightNumber: launch.flightNumber,
+            flightNumber: flightNum,
           ),
         ),
-      child: LaunchScreenBlocContent(flightNumber: launch.flightNumber),
+      child: LaunchScreenBlocContent(flightNumber: flightNum),
     );
   }
 }
