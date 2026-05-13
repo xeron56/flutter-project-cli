@@ -44,10 +44,6 @@ class $AssetsImagesGen {
   /// File path: assets/images/file_pdf.svg
   SvgGenImage get filePdf => const SvgGenImage('assets/images/file_pdf.svg');
 
-  /// File path: assets/images/flutter_logo.png
-  AssetGenImage get flutterLogo =>
-      const AssetGenImage('assets/images/flutter_logo.png');
-
   /// File path: assets/images/giveway_outline.svg
   SvgGenImage get givewayOutline =>
       const SvgGenImage('assets/images/giveway_outline.svg');
@@ -85,22 +81,21 @@ class $AssetsImagesGen {
   SvgGenImage get visa => const SvgGenImage('assets/images/visa.svg');
 
   /// List of all assets
-  List<dynamic> get values => [
-        chevronsRight,
-        fileDoc,
-        filePdf,
-        flutterLogo,
-        givewayOutline,
-        googlePay,
-        helpOutline,
-        hide,
-        iconStar,
-        iconStarActive,
-        phone,
-        tripOutline,
-        twemojiSunBehindCloud,
-        visa
-      ];
+  List<SvgGenImage> get values => [
+    chevronsRight,
+    fileDoc,
+    filePdf,
+    givewayOutline,
+    googlePay,
+    helpOutline,
+    hide,
+    iconStar,
+    iconStarActive,
+    phone,
+    tripOutline,
+    twemojiSunBehindCloud,
+    visa,
+  ];
 }
 
 class $AssetsIconsNavigationGen {
@@ -126,113 +121,12 @@ class Assets {
   static const $GoogleFontsGen googleFonts = $GoogleFontsGen();
 }
 
-class AssetGenImage {
-  const AssetGenImage(
-    this._assetName, {
-    this.size,
-    this.flavors = const {},
-    this.animation,
-  });
-
-  final String _assetName;
-
-  final Size? size;
-  final Set<String> flavors;
-  final AssetGenImageAnimation? animation;
-
-  Image image({
-    Key? key,
-    AssetBundle? bundle,
-    ImageFrameBuilder? frameBuilder,
-    ImageErrorWidgetBuilder? errorBuilder,
-    String? semanticLabel,
-    bool excludeFromSemantics = false,
-    double? scale,
-    double? width,
-    double? height,
-    Color? color,
-    Animation<double>? opacity,
-    BlendMode? colorBlendMode,
-    BoxFit? fit,
-    AlignmentGeometry alignment = Alignment.center,
-    ImageRepeat repeat = ImageRepeat.noRepeat,
-    Rect? centerSlice,
-    bool matchTextDirection = false,
-    bool gaplessPlayback = true,
-    bool isAntiAlias = false,
-    String? package,
-    FilterQuality filterQuality = FilterQuality.medium,
-    int? cacheWidth,
-    int? cacheHeight,
-  }) {
-    return Image.asset(
-      _assetName,
-      key: key,
-      bundle: bundle,
-      frameBuilder: frameBuilder,
-      errorBuilder: errorBuilder,
-      semanticLabel: semanticLabel,
-      excludeFromSemantics: excludeFromSemantics,
-      scale: scale,
-      width: width,
-      height: height,
-      color: color,
-      opacity: opacity,
-      colorBlendMode: colorBlendMode,
-      fit: fit,
-      alignment: alignment,
-      repeat: repeat,
-      centerSlice: centerSlice,
-      matchTextDirection: matchTextDirection,
-      gaplessPlayback: gaplessPlayback,
-      isAntiAlias: isAntiAlias,
-      package: package,
-      filterQuality: filterQuality,
-      cacheWidth: cacheWidth,
-      cacheHeight: cacheHeight,
-    );
-  }
-
-  ImageProvider provider({
-    AssetBundle? bundle,
-    String? package,
-  }) {
-    return AssetImage(
-      _assetName,
-      bundle: bundle,
-      package: package,
-    );
-  }
-
-  String get path => _assetName;
-
-  String get keyName => _assetName;
-}
-
-class AssetGenImageAnimation {
-  const AssetGenImageAnimation({
-    required this.isAnimation,
-    required this.duration,
-    required this.frames,
-  });
-
-  final bool isAnimation;
-  final Duration duration;
-  final int frames;
-}
-
 class SvgGenImage {
-  const SvgGenImage(
-    this._assetName, {
-    this.size,
-    this.flavors = const {},
-  }) : _isVecFormat = false;
+  const SvgGenImage(this._assetName, {this.size, this.flavors = const {}})
+    : _isVecFormat = false;
 
-  const SvgGenImage.vec(
-    this._assetName, {
-    this.size,
-    this.flavors = const {},
-  }) : _isVecFormat = true;
+  const SvgGenImage.vec(this._assetName, {this.size, this.flavors = const {}})
+    : _isVecFormat = true;
 
   final String _assetName;
   final Size? size;
@@ -288,7 +182,8 @@ class SvgGenImage {
       placeholderBuilder: placeholderBuilder,
       semanticsLabel: semanticsLabel,
       excludeFromSemantics: excludeFromSemantics,
-      colorFilter: colorFilter ??
+      colorFilter:
+          colorFilter ??
           (color == null ? null : ColorFilter.mode(color, colorBlendMode)),
       clipBehavior: clipBehavior,
       cacheColorFilter: cacheColorFilter,

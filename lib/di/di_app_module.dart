@@ -1,13 +1,15 @@
-import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker/talker.dart';
 
 @module
 abstract class DIAppModule {
-  @lazySingleton
-  GlobalKey<NavigatorState> get key => GlobalKey<NavigatorState>();
+  /// Awaited once during `getIt.init` so synchronous consumers downstream
+  /// (TokenStorage, ThemeStorage, FeatureFlags) can `get<SharedPreferences>()`
+  /// without an `await`.
+  @preResolve
+  Future<SharedPreferences> get prefs => SharedPreferences.getInstance();
 
-  Talker provideLogger() {
-    return Talker();
-  }
+  @lazySingleton
+  Talker provideLogger() => Talker();
 }

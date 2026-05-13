@@ -8,12 +8,10 @@ part of 'launch_service.dart';
 // RetrofitGenerator
 // **************************************************************************
 
-// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter
+// ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter,avoid_unused_constructor_parameters,unreachable_from_main
 
 class _LaunchService implements LaunchService {
-  _LaunchService(this._dio, {this.baseUrl, this.errorLogger}) {
-    baseUrl ??= 'https://api.spacexdata.com/v3/';
-  }
+  _LaunchService(this._dio, {this.baseUrl, this.errorLogger});
 
   final Dio _dio;
 
@@ -62,7 +60,7 @@ class _LaunchService implements LaunchService {
           )
           .toList();
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
+      errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
     return _value;
@@ -89,7 +87,7 @@ class _LaunchService implements LaunchService {
     try {
       _value = NetworkLaunchFullModel.fromJson(_result.data!);
     } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options);
+      errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
     }
     return _value;

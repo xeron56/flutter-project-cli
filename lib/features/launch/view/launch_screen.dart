@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,27 +18,17 @@ import 'package:flutter_bloc_app_template/generated/l10n.dart';
 import 'package:flutter_bloc_app_template/index.dart';
 
 class LaunchScreen extends StatelessWidget {
-  const LaunchScreen({super.key, this.flightNumber});
+  const LaunchScreen({super.key, required this.flightNumber});
 
-  final int? flightNumber;
+  final int flightNumber;
 
   @override
   Widget build(BuildContext context) {
-    // Get flightNumber from constructor, route arguments, or default to 1
-    final argumentsData = ModalRoute.of(context)?.settings.arguments;
-    final flightNum = flightNumber ??
-        (argumentsData is LaunchResource ? argumentsData.flightNumber : null) ??
-        1;
-
     return BlocProvider(
       create: (context) => LaunchBloc(
         RepositoryProvider.of<LaunchesRepository>(context),
-      )..add(
-          LaunchLoadEvent(
-            flightNumber: flightNum,
-          ),
-        ),
-      child: LaunchScreenBlocContent(flightNumber: flightNum),
+      )..add(LaunchLoadEvent(flightNumber: flightNumber)),
+      child: LaunchScreenBlocContent(flightNumber: flightNumber),
     );
   }
 }
@@ -63,9 +54,11 @@ class LaunchScreenBlocContent extends StatelessWidget {
           return LaunchScreenContent(
             resource: state.launch,
           );
-        case LaunchErrorState _:
+        case LaunchErrorState error:
           return Scaffold(
-            appBar: AppBar(),
+            appBar: AppBar(
+              title: Text(error.failure.message ?? 'Error'),
+            ),
             body: ErrorContent(
               onTryAgainClick: () {
                 context.read<LaunchBloc>().add(
@@ -206,10 +199,10 @@ class _LaunchScreenContentState extends State<LaunchScreenContent>
                           return Stack(
                             fit: StackFit.expand,
                             children: [
-                              Image.network(
-                                images[index],
+                              CachedNetworkImage(
+                                imageUrl: images[index],
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
+                                errorWidget: (_, _, _) =>
                                     const SizedBox.shrink(),
                               ),
                               // Gradient Overlay
@@ -259,13 +252,11 @@ class _LaunchScreenContentState extends State<LaunchScreenContent>
                                 child: (widget.resource.links?.missionPatchSmall
                                             ?.isNotEmpty ??
                                         false)
-                                    ? Image.network(
-                                        widget
-                                            .resource.links!.missionPatchSmall!,
+                                    ? CachedNetworkImage(
+                                        imageUrl: widget.resource.links!
+                                            .missionPatchSmall!,
                                         height: 80,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                const Icon(
+                                        errorWidget: (_, _, _) => const Icon(
                                           Icons.rocket_launch,
                                           size: 60,
                                           color: Colors.white,

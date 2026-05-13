@@ -8,5 +8,7 @@ abstract class LaunchState with _$LaunchState {
     required LaunchFullResource launch,
   }) = LaunchSuccessState;
 
-  const factory LaunchState.error() = LaunchErrorState;
+  const factory LaunchState.error({
+    required Failure failure,
+  }) = LaunchErrorState;
 }

@@ -1,7 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class RoundedNetworkImage extends StatelessWidget {
-  RoundedNetworkImage({
+  const RoundedNetworkImage({
+    super.key,
     required this.imageUrl,
     this.borderRadius = 10.0,
     this.fit = BoxFit.cover,
@@ -14,9 +16,9 @@ class RoundedNetworkImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
+        child: CachedNetworkImage(
+          imageUrl: imageUrl,
+          fit: fit,
         ),
       );
 }

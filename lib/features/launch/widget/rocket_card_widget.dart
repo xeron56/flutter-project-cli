@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc_app_template/features/launch/info_item.dart';
 import 'package:flutter_bloc_app_template/features/launch/widget/feature_chip_widget.dart';
 import 'package:flutter_bloc_app_template/features/launch/widget/info_grid_widget.dart';
+import 'package:flutter_bloc_app_template/features/launch/widget/info_item.dart';
 import 'package:flutter_bloc_app_template/generated/l10n.dart';
 import 'package:flutter_bloc_app_template/models/launch/launch_rocket_resource.dart';
 

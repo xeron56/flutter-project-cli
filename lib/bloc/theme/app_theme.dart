@@ -1,83 +1,16 @@
-import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 
+/// Single source of truth for the user's theme preference.
+///
+/// Maps 1:1 onto Flutter's [ThemeMode]. Persisted via `ThemeStorage`.
 enum AppTheme {
-  light,
-  dark,
-  lightGold,
-  darkGold,
-  lightMint,
-  darkMint,
   system,
-  experimental,
-}
+  light,
+  dark;
 
-class DarkThemePreference extends Equatable {
-  DarkThemePreference({
-    this.darkThemeValue = followSystem,
-    this.isHighContrastModeEnabled = false,
-  });
-
-  static const int followSystem = 1;
-  static const int on = 2;
-  static const int off = 3;
-
-  final int darkThemeValue;
-  final bool isHighContrastModeEnabled;
-
-  @override
-  List<Object?> get props => [
-        darkThemeValue,
-        isHighContrastModeEnabled,
-      ];
-
-  DarkThemePreference copyWith({
-    int? darkThemeValue,
-    bool? isHighContrastModeEnabled,
-  }) {
-    return DarkThemePreference(
-      darkThemeValue: darkThemeValue ?? this.darkThemeValue,
-      isHighContrastModeEnabled:
-          isHighContrastModeEnabled ?? this.isHighContrastModeEnabled,
-    );
-  }
-}
-
-extension DarkThemePreferenceExt on DarkThemePreference {
-  bool isDarkTheme() {
-    return darkThemeValue == DarkThemePreference.on;
-  }
-}
-
-class AppThemeSettings extends Equatable {
-  AppThemeSettings({
-    required this.darkTheme,
-    required this.appTheme,
-  });
-
-  final DarkThemePreference darkTheme;
-  final AppTheme appTheme;
-
-  @override
-  List<Object?> get props => [
-        darkTheme,
-        appTheme,
-      ];
-
-  AppThemeSettings copyWith({
-    DarkThemePreference? darkTheme,
-    AppTheme? appTheme,
-  }) {
-    return AppThemeSettings(
-      darkTheme: darkTheme ?? this.darkTheme,
-      appTheme: appTheme ?? this.appTheme,
-    );
-  }
-}
-
-extension AppThemeExtention on AppTheme {
-  bool isDarkTheme() {
-    return this == AppTheme.dark ||
-        this != AppTheme.darkGold ||
-        this != AppTheme.darkMint;
-  }
+  ThemeMode get themeMode => switch (this) {
+        AppTheme.system => ThemeMode.system,
+        AppTheme.light => ThemeMode.light,
+        AppTheme.dark => ThemeMode.dark,
+      };
 }

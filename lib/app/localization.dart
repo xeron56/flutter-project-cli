@@ -11,6 +11,7 @@ const appSupportedLocales = <Locale>[
   Locale('de', ''),
   Locale('pt', ''),
   Locale('uk', ''),
+  Locale('ar', ''),
 ];
 
 const appLocalizationsDelegates = <LocalizationsDelegate<dynamic>>[

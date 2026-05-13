@@ -1,5 +1,5 @@
-// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
 
 // **************************************************************************
 // InjectableConfigGenerator
@@ -10,61 +10,85 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:dio/dio.dart' as _i361;
-import 'package:flutter/material.dart' as _i409;
-import 'package:flutter_bloc_app_template/data/network/data_source/launches_network_data_source.dart'
-    as _i358;
-import 'package:flutter_bloc_app_template/data/network/service/launch/launch_service.dart'
-    as _i511;
-import 'package:flutter_bloc_app_template/data/theme_storage.dart' as _i750;
-import 'package:flutter_bloc_app_template/di/di_app_module.dart' as _i367;
-import 'package:flutter_bloc_app_template/di/di_data_module.dart' as _i513;
-import 'package:flutter_bloc_app_template/di/di_network_module.dart' as _i52;
-import 'package:flutter_bloc_app_template/di/di_repository_module.dart'
-    as _i381;
-import 'package:flutter_bloc_app_template/repository/launches_repository.dart'
-    as _i11;
-import 'package:flutter_bloc_app_template/repository/theme_repository.dart'
-    as _i626;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:shared_preferences/shared_preferences.dart' as _i460;
 import 'package:talker/talker.dart' as _i993;
 
+import '../config/feature_flags.dart' as _i645;
+import '../data/auth/auth_data_source.dart' as _i178;
+import '../data/auth/token_storage.dart' as _i625;
+import '../data/network/data_source/launches_network_data_source.dart'
+    as _i1037;
+import '../data/network/service/launch/launch_service.dart' as _i257;
+import '../data/theme_storage.dart' as _i53;
+import '../repository/auth_repository.dart' as _i106;
+import '../repository/launches_repository.dart' as _i671;
+import '../repository/theme_repository.dart' as _i625;
+import 'di_app_module.dart' as _i1021;
+import 'di_data_module.dart' as _i442;
+import 'di_network_module.dart' as _i372;
+import 'di_repository_module.dart' as _i8;
+
 extension GetItInjectableX on _i174.GetIt {
-// initializes the registration of main-scope dependencies inside of GetIt
-  _i174.GetIt init({
+  // initializes the registration of main-scope dependencies inside of GetIt
+  Future<_i174.GetIt> init({
     String? environment,
     _i526.EnvironmentFilter? environmentFilter,
-  }) {
-    final gh = _i526.GetItHelper(
-      this,
-      environment,
-      environmentFilter,
-    );
+  }) async {
+    final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final dIAppModule = _$DIAppModule();
     final networkModule = _$NetworkModule();
-    final dIDataModule = _$DIDataModule();
     final repositoryModule = _$RepositoryModule();
-    gh.factory<_i993.Talker>(() => dIAppModule.provideLogger());
-    gh.factory<_i361.Dio>(() => networkModule.provideDio());
-    gh.lazySingleton<_i409.GlobalKey<_i409.NavigatorState>>(
-        () => dIAppModule.key);
-    gh.lazySingleton<_i750.ThemeStorage>(() => dIDataModule.themeStorage);
-    gh.factory<_i511.LaunchService>(
-        () => networkModule.provideLaunchService(gh<_i361.Dio>()));
-    gh.factory<_i626.ThemeRepository>(() =>
-        repositoryModule.provideAccidentsRepository(gh<_i750.ThemeStorage>()));
-    gh.factory<_i358.LaunchesDataSource>(() =>
-        networkModule.provideLaunchesDataSource(gh<_i511.LaunchService>()));
-    gh.factory<_i11.LaunchesRepository>(() => repositoryModule
-        .provideLaunchesRepository(gh<_i358.LaunchesDataSource>()));
+    final dIDataModule = _$DIDataModule();
+    await gh.factoryAsync<_i460.SharedPreferences>(
+      () => dIAppModule.prefs,
+      preResolve: true,
+    );
+    gh.lazySingleton<_i993.Talker>(() => dIAppModule.provideLogger());
+    gh.lazySingleton<_i625.TokenStorage>(
+      () => networkModule.provideTokenStorage(),
+    );
+    gh.lazySingleton<_i178.AuthDataSource>(
+      () => repositoryModule.provideAuthDataSource(),
+    );
+    gh.lazySingleton<_i106.AuthRepository>(
+      () => repositoryModule.provideAuthRepository(
+        gh<_i178.AuthDataSource>(),
+        gh<_i625.TokenStorage>(),
+      ),
+    );
+    gh.lazySingleton<_i53.ThemeStorage>(
+      () => dIDataModule.provideThemeStorage(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i645.FeatureFlags>(
+      () => dIDataModule.provideFeatureFlags(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i361.Dio>(
+      () => networkModule.provideDio(gh<_i625.TokenStorage>()),
+    );
+    gh.factory<_i625.ThemeRepository>(
+      () => repositoryModule.provideThemeRepository(gh<_i53.ThemeStorage>()),
+    );
+    gh.lazySingleton<_i257.LaunchService>(
+      () => networkModule.provideLaunchService(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i1037.LaunchesDataSource>(
+      () => networkModule.provideLaunchesDataSource(gh<_i257.LaunchService>()),
+    );
+    gh.factory<_i671.LaunchesRepository>(
+      () => repositoryModule.provideLaunchesRepository(
+        gh<_i1037.LaunchesDataSource>(),
+      ),
+    );
     return this;
   }
 }
 
-class _$DIAppModule extends _i367.DIAppModule {}
+class _$DIAppModule extends _i1021.DIAppModule {}
 
-class _$NetworkModule extends _i52.NetworkModule {}
+class _$NetworkModule extends _i372.NetworkModule {}
 
-class _$DIDataModule extends _i513.DIDataModule {}
+class _$RepositoryModule extends _i8.RepositoryModule {}
 
-class _$RepositoryModule extends _i381.RepositoryModule {}
+class _$DIDataModule extends _i442.DIDataModule {}

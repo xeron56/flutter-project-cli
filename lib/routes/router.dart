@@ -1,117 +1,168 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_bloc_app_template/features/launch/launch_screen.dart';
-import 'package:flutter_bloc_app_template/features/appearance/appearance_screen.dart';
-import 'package:flutter_bloc_app_template/features/appearance/dark_theme_screen.dart';
-import 'package:flutter_bloc_app_template/index.dart';
+import 'dart:async';
 
-class Routes {
-  static const app = 'home';
-  static const launch = 'launch';
-  static const settings = 'settings';
-  static const appearance = 'appearance';
-  static const darkTheme = 'darkTheme';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc_app_template/features/auth/bloc/auth_bloc.dart';
+import 'package:flutter_bloc_app_template/features/auth/view/login_screen.dart';
+import 'package:flutter_bloc_app_template/features/launch/view/launch_screen.dart';
+import 'package:flutter_bloc_app_template/features/main/main_screen.dart';
+import 'package:flutter_bloc_app_template/features/settings/view/settings_screen.dart';
+import 'package:go_router/go_router.dart';
+
+/// Canonical list of route paths. Use these instead of raw strings.
+abstract final class AppRoutes {
+  static const splash = '/';
+  static const login = '/login';
+  static const home = '/home';
+  static const settings = '/settings';
+  static const launchDetail = '/launch/:flightNumber';
+
+  static String launchFor(int flightNumber) => '/launch/$flightNumber';
 }
 
-final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
+/// Builds the app's [GoRouter] and wires the auth redirect.
+///
+/// Keep the route table here — feature screens import only the path
+/// constants, not the router itself.
+GoRouter buildRouter(AuthBloc authBloc) {
+  return GoRouter(
+    initialLocation: AppRoutes.splash,
+    debugLogDiagnostics: kDebugMode,
+    refreshListenable: _BlocStreamListenable(authBloc.stream),
+    redirect: (context, state) {
+      final auth = authBloc.state;
 
-class NavigationService {
-  final _appRoutes = {
-    Routes.app: (_) => const MainScreen(),
-    Routes.launch: (_) => const LaunchScreen(),
-    Routes.settings: (_) => const SettingsScreen(),
-    Routes.appearance: (_) => const AppearanceScreen(),
-    Routes.darkTheme: (_) => const DarkThemeScreen(),
-  };
+      if (!auth.isResolved) {
+        return state.matchedLocation == AppRoutes.splash
+            ? null
+            : AppRoutes.splash;
+      }
 
-  final Set<String> _animatedRoutes = {
-    Routes.launch,
-    Routes.settings,
-    Routes.appearance,
-    Routes.darkTheme,
-  };
+      final atSplash = state.matchedLocation == AppRoutes.splash;
+      final atLogin = state.matchedLocation == AppRoutes.login;
 
-  // iOS: full screen routes pop up from the bottom and disappear vertically too
-  // On iOS that's a standard full screen dialog
-  // Has no effect on Android.
-  final Set<String> _fullScreenRoutes = {};
+      if (!auth.isAuthenticated) {
+        return atLogin ? null : AppRoutes.login;
+      }
 
-  // iOS transition: Pages that slides in from the right and exits in reverse.
-  final Set<String> _cupertinoRoutes = {};
+      if (atLogin || atSplash) {
+        return AppRoutes.home;
+      }
+      return null;
+    },
+    routes: [
+      GoRoute(
+        path: AppRoutes.splash,
+        builder: (_, _) => const _SplashScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.login,
+        builder: (_, _) => const LoginScreen(),
+      ),
+      ShellRoute(
+        builder: (_, _, child) => MainScreen(child: child),
+        routes: [
+          GoRoute(
+            path: AppRoutes.home,
+            pageBuilder: (_, state) => _fadeTransition(state, _HomeTab()),
+          ),
+          GoRoute(
+            path: AppRoutes.settings,
+            pageBuilder: (_, state) =>
+                _fadeTransition(state, const SettingsScreen()),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.launchDetail,
+        builder: (_, state) {
+          final raw = state.pathParameters['flightNumber'];
+          final flightNumber = int.tryParse(raw ?? '') ?? 1;
+          return LaunchScreen(flightNumber: flightNumber);
+        },
+      ),
+    ],
+    errorBuilder: (_, state) => _NotFoundScreen(uri: state.uri.toString()),
+  );
+}
 
-  static NavigationService of(BuildContext context) =>
-      RepositoryProvider.of<NavigationService>(context);
+CustomTransitionPage<T> _fadeTransition<T>(
+  GoRouterState state,
+  Widget child,
+) =>
+    CustomTransitionPage<T>(
+      key: state.pageKey,
+      child: child,
+      transitionsBuilder: (_, animation, _, child) =>
+          FadeTransition(opacity: animation, child: child),
+    );
 
-  Future<dynamic> navigateTo(
-    String routeName, [
-    Object? arguments,
-    bool replace = false,
-  ]) async {
-    if (_appRoutes[routeName] != null) {
-      return replace
-          ? appNavigatorKey.currentState
-              ?.pushReplacementNamed(routeName, arguments: arguments)
-          : appNavigatorKey.currentState?.pushNamed(
-              routeName,
-              arguments: arguments,
-            );
-    }
+class _BlocStreamListenable extends ChangeNotifier {
+  _BlocStreamListenable(Stream<dynamic> stream) {
+    _sub = stream.asBroadcastStream().listen((_) => notifyListeners());
   }
 
-  Route<dynamic> onGenerateRoute(RouteSettings settings) {
-    final builder = _appRoutes[settings.name];
-    if (builder == null) {
-      return MaterialPageRoute(builder: (_) => const SplashView());
-    }
+  late final StreamSubscription<dynamic> _sub;
 
-    final isFullScreen = _fullScreenRoutes.contains(settings.name);
-    final isCupertino = _cupertinoRoutes.contains(settings.name);
-    final isAnimated = _animatedRoutes.contains(settings.name);
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
+}
 
-    if (isAnimated) {
-      return PageRouteBuilder(
-        settings: settings,
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            builder(settings.arguments),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0); // Slide from right
-          const end = Offset.zero;
-          const curve = Curves.easeInOut;
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
 
-          final tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          final offsetAnimation = animation.drive(tween);
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+  }
+}
 
-          return SlideTransition(
-            position: offsetAnimation,
-            child: child,
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 400),
-      );
-    }
-
-    if (isCupertino) {
-      return CupertinoPageRoute(
-        settings: settings,
-        builder: (_) => builder(settings.arguments),
-        fullscreenDialog: isFullScreen,
-      );
-    }
-
-    return MaterialPageRoute(
-      settings: settings,
-      builder: (_) => builder(settings.arguments),
-      fullscreenDialog: isFullScreen,
+class _HomeTab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Home')),
+      body: ListView(
+        children: [
+          for (var i = 1; i <= 5; i++)
+            ListTile(
+              title: Text('Launch #$i'),
+              subtitle: const Text('Tap to load SpaceX launch details'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.go(AppRoutes.launchFor(i)),
+            ),
+        ],
+      ),
     );
   }
+}
 
-  Future<dynamic> pushAndRemoveAll(
-    String routeName, [
-    Object? arguments,
-  ]) async {
-    return appNavigatorKey.currentState
-        ?.pushNamedAndRemoveUntil(routeName, (route) => false);
+class _NotFoundScreen extends StatelessWidget {
+  const _NotFoundScreen({required this.uri});
+  final String uri;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Not found')),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 48),
+            const SizedBox(height: 12),
+            Text('No route for "$uri"'),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () => context.go(AppRoutes.home),
+              child: const Text('Go home'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

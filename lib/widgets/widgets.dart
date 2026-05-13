@@ -1,5 +1,6 @@
 export 'bottom_sheet_dialog.dart';
 export 'bottom_sheet_dialog_icon.dart';
+export 'connectivity_banner.dart';
 export 'empty_content.dart';
 export 'empty_widget.dart';
 export 'error_content.dart';

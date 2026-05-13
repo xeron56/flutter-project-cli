@@ -1,9 +1,11 @@
-import 'package:flutter_bloc_app_template/data/network/api_result.dart';
 import 'package:flutter_bloc_app_template/data/network/data_source/launches_network_data_source.dart';
 import 'package:flutter_bloc_app_template/index.dart';
 
+/// Domain-facing contract. Returns `Result<T>` so callers (blocs) can pattern
+/// match instead of catching exceptions. Network models are converted to the
+/// domain `*Resource` types here so the UI never sees `network_*` shapes.
 abstract class LaunchesRepository {
-  Future<List<LaunchResource>> getLaunches({
+  Future<Result<List<LaunchResource>>> getLaunches({
     bool? hasId = true,
     int? limit,
     int? offset,
@@ -12,7 +14,7 @@ abstract class LaunchesRepository {
     String? order,
   });
 
-  Future<LaunchFullResource> getLaunch(int flightNumber);
+  Future<Result<LaunchFullResource>> getLaunch(int flightNumber);
 }
 
 class LaunchesRepositoryImpl implements LaunchesRepository {
@@ -21,7 +23,7 @@ class LaunchesRepositoryImpl implements LaunchesRepository {
   final LaunchesDataSource _launchesDataSource;
 
   @override
-  Future<List<LaunchResource>> getLaunches({
+  Future<Result<List<LaunchResource>>> getLaunches({
     bool? hasId = true,
     int? limit,
     int? offset,
@@ -29,7 +31,7 @@ class LaunchesRepositoryImpl implements LaunchesRepository {
     int? launchSuccess,
     String? order,
   }) async {
-    final list = await _launchesDataSource.getLaunches(
+    final result = await _launchesDataSource.getLaunches(
       hasId: hasId,
       limit: limit,
       offset: offset,
@@ -37,26 +39,12 @@ class LaunchesRepositoryImpl implements LaunchesRepository {
       launchSuccess: launchSuccess,
       order: order,
     );
-
-    return ApiResultWhen(list).when(
-      success: (data) => data.map((e) => e.toResource()).toList(),
-      error: (message) => throw Exception(message),
-      loading: () {
-        throw Exception('Loading');
-      },
-    );
+    return result.map((list) => list.map((e) => e.toResource()).toList());
   }
 
   @override
-  Future<LaunchFullResource> getLaunch(int flightNumber) async {
-    final networkFullLaunch = await _launchesDataSource.getLaunch(flightNumber);
-
-    return ApiResultWhen(networkFullLaunch).when(
-      success: (data) => data.toResource(),
-      error: (message) => throw Exception(message),
-      loading: () {
-        throw Exception('Loading');
-      },
-    );
+  Future<Result<LaunchFullResource>> getLaunch(int flightNumber) async {
+    final result = await _launchesDataSource.getLaunch(flightNumber);
+    return result.map((model) => model.toResource());
   }
 }
