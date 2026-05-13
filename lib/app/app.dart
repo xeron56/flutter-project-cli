@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_bloc_app_template/app/localization.dart';
@@ -33,7 +32,7 @@ class _AppView extends StatelessWidget {
     final themeMode = context.watch<ThemeCubit>().state.themeMode;
 
     return MaterialApp.router(
-      debugShowCheckedModeBanner: kDebugMode,
+      debugShowCheckedModeBanner: false,
       restorationScopeId: 'app',
       localizationsDelegates: appLocalizationsDelegates,
       supportedLocales: appSupportedLocales,

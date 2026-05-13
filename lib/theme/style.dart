@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Brand seed for `ColorScheme.fromSeed`. Change here to rebrand the app.
-const Color kBrandSeed = Color(0xFF6750A4);
+const Color kBrandSeed = Color(0xFF6B4EFF);
 
 /// Builds a `ThemeData` pair from a single seed color.
 ///
@@ -27,11 +27,20 @@ class MaterialTheme {
       useMaterial3: true,
       colorScheme: scheme,
       textTheme: textTheme,
-      scaffoldBackgroundColor: scheme.surface,
+      scaffoldBackgroundColor: const Color(0xFFF8F7FB),
+      dividerColor: const Color(0xFFEAE5F0),
       appBarTheme: AppBarTheme(
-        backgroundColor: scheme.surface,
+        backgroundColor: const Color(0xFFF8F7FB),
         foregroundColor: scheme.onSurface,
         centerTitle: false,
+      ),
+      cardTheme: CardThemeData(
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Color(0xFFEAE5F0)),
+        ),
       ),
     );
   }

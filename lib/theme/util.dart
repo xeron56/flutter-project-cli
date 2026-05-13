@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -9,9 +10,17 @@ TextTheme createTextTheme({
   String displayFontString = _defaultFontName,
 }) {
   final baseTextTheme = Theme.of(context).textTheme;
+  final platform = defaultTargetPlatform;
+
+  if (platform == TargetPlatform.iOS || platform == TargetPlatform.macOS) {
+    return baseTextTheme;
+  }
+
   final bodyTextTheme = GoogleFonts.getTextTheme(bodyFontString, baseTextTheme);
-  final displayTextTheme =
-      GoogleFonts.getTextTheme(displayFontString, baseTextTheme);
+  final displayTextTheme = GoogleFonts.getTextTheme(
+    displayFontString,
+    baseTextTheme,
+  );
   final textTheme = displayTextTheme.copyWith(
     bodyLarge: bodyTextTheme.bodyLarge,
     bodyMedium: bodyTextTheme.bodyMedium,
