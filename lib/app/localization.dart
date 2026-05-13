@@ -8,10 +8,6 @@ import 'package:flutter_localizations/flutter_localizations.dart'
 
 const appSupportedLocales = <Locale>[
   Locale('en', ''),
-  Locale('de', ''),
-  Locale('pt', ''),
-  Locale('uk', ''),
-  Locale('ar', ''),
 ];
 
 const appLocalizationsDelegates = <LocalizationsDelegate<dynamic>>[

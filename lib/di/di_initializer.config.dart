@@ -16,13 +16,10 @@ import 'package:shared_preferences/shared_preferences.dart' as _i460;
 import 'package:talker/talker.dart' as _i993;
 
 import '../config/feature_flags.dart' as _i645;
-import '../data/auth/auth_data_source.dart' as _i178;
-import '../data/auth/token_storage.dart' as _i625;
 import '../data/network/data_source/launches_network_data_source.dart'
     as _i1037;
 import '../data/network/service/launch/launch_service.dart' as _i257;
 import '../data/theme_storage.dart' as _i53;
-import '../repository/auth_repository.dart' as _i106;
 import '../repository/launches_repository.dart' as _i671;
 import '../repository/theme_repository.dart' as _i625;
 import 'di_app_module.dart' as _i1021;
@@ -31,7 +28,6 @@ import 'di_network_module.dart' as _i372;
 import 'di_repository_module.dart' as _i8;
 
 extension GetItInjectableX on _i174.GetIt {
-  // initializes the registration of main-scope dependencies inside of GetIt
   Future<_i174.GetIt> init({
     String? environment,
     _i526.EnvironmentFilter? environmentFilter,
@@ -46,27 +42,13 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.lazySingleton<_i993.Talker>(() => dIAppModule.provideLogger());
-    gh.lazySingleton<_i625.TokenStorage>(
-      () => networkModule.provideTokenStorage(),
-    );
-    gh.lazySingleton<_i178.AuthDataSource>(
-      () => repositoryModule.provideAuthDataSource(),
-    );
-    gh.lazySingleton<_i106.AuthRepository>(
-      () => repositoryModule.provideAuthRepository(
-        gh<_i178.AuthDataSource>(),
-        gh<_i625.TokenStorage>(),
-      ),
-    );
     gh.lazySingleton<_i53.ThemeStorage>(
       () => dIDataModule.provideThemeStorage(gh<_i460.SharedPreferences>()),
     );
     gh.lazySingleton<_i645.FeatureFlags>(
       () => dIDataModule.provideFeatureFlags(gh<_i460.SharedPreferences>()),
     );
-    gh.lazySingleton<_i361.Dio>(
-      () => networkModule.provideDio(gh<_i625.TokenStorage>()),
-    );
+    gh.lazySingleton<_i361.Dio>(() => networkModule.provideDio());
     gh.factory<_i625.ThemeRepository>(
       () => repositoryModule.provideThemeRepository(gh<_i53.ThemeStorage>()),
     );
