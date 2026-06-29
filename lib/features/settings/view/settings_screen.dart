@@ -18,8 +18,8 @@ class SettingsScreen extends StatelessWidget {
               child: Text(
                 'Appearance',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
             RadioGroup<AppTheme>(
@@ -44,8 +44,8 @@ class SettingsScreen extends StatelessWidget {
   }
 
   String _label(AppTheme t) => switch (t) {
-        AppTheme.system => 'Follow system',
-        AppTheme.light => 'Light',
-        AppTheme.dark => 'Dark',
-      };
+    AppTheme.system => 'Follow system',
+    AppTheme.light => 'Light',
+    AppTheme.dark => 'Dark',
+  };
 }

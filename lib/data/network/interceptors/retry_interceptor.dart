@@ -29,9 +29,8 @@ class RetryInterceptor extends Interceptor {
     final isIdempotent = method == 'GET' || method == 'HEAD';
     final retryCount = (options.extra[_retryCountKey] as int?) ?? 0;
 
-    final shouldRetry = isIdempotent &&
-        retryCount < maxRetries &&
-        _isTransient(err);
+    final shouldRetry =
+        isIdempotent && retryCount < maxRetries && _isTransient(err);
 
     if (!shouldRetry) {
       return handler.next(err);

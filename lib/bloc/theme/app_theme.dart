@@ -9,8 +9,8 @@ enum AppTheme {
   dark;
 
   ThemeMode get themeMode => switch (this) {
-        AppTheme.system => ThemeMode.system,
-        AppTheme.light => ThemeMode.light,
-        AppTheme.dark => ThemeMode.dark,
-      };
+    AppTheme.system => ThemeMode.system,
+    AppTheme.light => ThemeMode.light,
+    AppTheme.dark => ThemeMode.dark,
+  };
 }

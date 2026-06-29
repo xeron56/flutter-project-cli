@@ -13,7 +13,7 @@ extension DateFormatExtension on DateTime {
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
 
     return '${monthNames[month]} ${day.toString().padLeft(2, '0')}';

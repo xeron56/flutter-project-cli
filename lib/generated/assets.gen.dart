@@ -31,73 +31,6 @@ class $AssetsIconsGen {
   $AssetsIconsNavigationGen get navigation => const $AssetsIconsNavigationGen();
 }
 
-class $AssetsImagesGen {
-  const $AssetsImagesGen();
-
-  /// File path: assets/images/chevrons-right.svg
-  SvgGenImage get chevronsRight =>
-      const SvgGenImage('assets/images/chevrons-right.svg');
-
-  /// File path: assets/images/file_doc.svg
-  SvgGenImage get fileDoc => const SvgGenImage('assets/images/file_doc.svg');
-
-  /// File path: assets/images/file_pdf.svg
-  SvgGenImage get filePdf => const SvgGenImage('assets/images/file_pdf.svg');
-
-  /// File path: assets/images/giveway_outline.svg
-  SvgGenImage get givewayOutline =>
-      const SvgGenImage('assets/images/giveway_outline.svg');
-
-  /// File path: assets/images/google_pay.svg
-  SvgGenImage get googlePay =>
-      const SvgGenImage('assets/images/google_pay.svg');
-
-  /// File path: assets/images/help_outline.svg
-  SvgGenImage get helpOutline =>
-      const SvgGenImage('assets/images/help_outline.svg');
-
-  /// File path: assets/images/hide.svg
-  SvgGenImage get hide => const SvgGenImage('assets/images/hide.svg');
-
-  /// File path: assets/images/icon_star.svg
-  SvgGenImage get iconStar => const SvgGenImage('assets/images/icon_star.svg');
-
-  /// File path: assets/images/icon_star_active.svg
-  SvgGenImage get iconStarActive =>
-      const SvgGenImage('assets/images/icon_star_active.svg');
-
-  /// File path: assets/images/phone.svg
-  SvgGenImage get phone => const SvgGenImage('assets/images/phone.svg');
-
-  /// File path: assets/images/trip_outline.svg
-  SvgGenImage get tripOutline =>
-      const SvgGenImage('assets/images/trip_outline.svg');
-
-  /// File path: assets/images/twemoji_sun_behind_cloud.svg
-  SvgGenImage get twemojiSunBehindCloud =>
-      const SvgGenImage('assets/images/twemoji_sun_behind_cloud.svg');
-
-  /// File path: assets/images/visa.svg
-  SvgGenImage get visa => const SvgGenImage('assets/images/visa.svg');
-
-  /// List of all assets
-  List<SvgGenImage> get values => [
-    chevronsRight,
-    fileDoc,
-    filePdf,
-    givewayOutline,
-    googlePay,
-    helpOutline,
-    hide,
-    iconStar,
-    iconStarActive,
-    phone,
-    tripOutline,
-    twemojiSunBehindCloud,
-    visa,
-  ];
-}
-
 class $AssetsIconsNavigationGen {
   const $AssetsIconsNavigationGen();
 
@@ -117,7 +50,6 @@ class Assets {
   const Assets._();
 
   static const $AssetsIconsGen icons = $AssetsIconsGen();
-  static const $AssetsImagesGen images = $AssetsImagesGen();
   static const $GoogleFontsGen googleFonts = $GoogleFontsGen();
 }
 

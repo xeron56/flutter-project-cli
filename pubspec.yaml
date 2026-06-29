@@ -1,5 +1,5 @@
 name: flutter_bloc_app_template
-description: The project of the empty template with Flutter has built the basic framework to realize the functions of internationalization, theme peeling etc.
+description: Empty Flutter BLoC app template with flavors, routing, DI, networking, localization, and theme foundations.
 
 publish_to: 'none'
 
@@ -101,8 +101,6 @@ flutter:
   generate: true
 
   assets:
-    # Add assets from the images directory to the application.
-    - assets/images/
     - assets/icons/navigation/
     - google_fonts/
   fonts:

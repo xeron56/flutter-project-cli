@@ -14,12 +14,12 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MultiRepositoryProvider(
-        providers: AppRepositoryProviders.providers(),
-        child: MultiBlocProvider(
-          providers: AppBlocProviders.providers(),
-          child: const _AppView(),
-        ),
-      );
+    providers: AppRepositoryProviders.providers(),
+    child: MultiBlocProvider(
+      providers: AppBlocProviders.providers(),
+      child: const _AppView(),
+    ),
+  );
 }
 
 class _AppView extends StatelessWidget {

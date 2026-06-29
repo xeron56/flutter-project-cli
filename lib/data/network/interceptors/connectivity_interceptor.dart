@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 /// fast with a `NetworkFailure` instead of waiting for a socket timeout.
 class ConnectivityInterceptor extends Interceptor {
   ConnectivityInterceptor([Connectivity? connectivity])
-      : _connectivity = connectivity ?? Connectivity();
+    : _connectivity = connectivity ?? Connectivity();
 
   final Connectivity _connectivity;
 
@@ -15,8 +15,8 @@ class ConnectivityInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     final results = await _connectivity.checkConnectivity();
-    final offline = results.isEmpty ||
-        results.every((r) => r == ConnectivityResult.none);
+    final offline =
+        results.isEmpty || results.every((r) => r == ConnectivityResult.none);
     if (offline) {
       return handler.reject(
         DioException(

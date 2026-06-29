@@ -6,9 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart'
         GlobalMaterialLocalizations,
         GlobalWidgetsLocalizations;
 
-const appSupportedLocales = <Locale>[
-  Locale('en', ''),
-];
+const appSupportedLocales = <Locale>[Locale('en', '')];
 
 const appLocalizationsDelegates = <LocalizationsDelegate<dynamic>>[
   S.delegate,

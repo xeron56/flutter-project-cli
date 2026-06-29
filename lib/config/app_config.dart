@@ -22,10 +22,9 @@ class AppConfig {
     String? apiBaseUrl,
     String? sentryDsn,
     Map<String, bool>? featureFlagsOverride,
-  }) =>
-      AppConfig(
-        apiBaseUrl: apiBaseUrl ?? this.apiBaseUrl,
-        sentryDsn: sentryDsn ?? this.sentryDsn,
-        featureFlagsOverride: featureFlagsOverride ?? this.featureFlagsOverride,
-      );
+  }) => AppConfig(
+    apiBaseUrl: apiBaseUrl ?? this.apiBaseUrl,
+    sentryDsn: sentryDsn ?? this.sentryDsn,
+    featureFlagsOverride: featureFlagsOverride ?? this.featureFlagsOverride,
+  );
 }

@@ -1,116 +1,141 @@
-# flutter-bloc-app-template
+# Flutter BLoC App Template
 
-Opinionated Flutter starter that an AI agent (or a human) can extend with new
-features without re-inventing the wiring. The repository is meant as a **base**
-— clone it, change the package name and brand seed, and start adding feature
-slices.
+Empty Flutter starter for building API-backed apps with a consistent BLoC,
+repository, network, DI, routing, flavor, localization, and theme structure.
 
-The template ships a small but realistic example surface: an **Auth flow**
-(login screen, secure storage, redirect-aware router) and a **SpaceX launch
-detail** screen that demonstrates the network → repository → bloc → UI path.
+The template intentionally contains no demo API and no sample product domain.
+The first screen is an offline placeholder so new projects do not make network
+calls before real backend details are added.
 
-## What's included
+## Included
 
-| Concern              | Library / pattern                                                                 |
-| -------------------- | ---------------------------------------------------------------------------------- |
-| State management     | `flutter_bloc` (Bloc + Cubit), `freezed` for sealed states                         |
-| Routing              | `go_router` with shell route, auth-aware redirect, 404 page                        |
-| Forms                | `formz` validators                                                                 |
-| Error model          | Sealed `Failure` + `Either<Failure, T>` (alias `Result<T>`) via `dartz`            |
-| Networking           | `dio` + `retrofit` + interceptors (auth, retry, connectivity, talker logger)       |
-| DI                   | `get_it` + `injectable` (codegen)                                                  |
-| Storage              | `shared_preferences` + `flutter_secure_storage` for tokens                         |
-| Theme                | Seed-based `ColorScheme.fromSeed` (one knob to rebrand)                            |
-| Connectivity         | `connectivity_plus` + an offline banner widget                                     |
-| Crash reporting      | `runZonedGuarded` + `FlutterError.onError` (drop your Sentry/Crashlytics in)       |
-| Feature flags        | Tiny `FeatureFlags` over `SharedPreferences` with per-flavor static overrides      |
-| Localization         | ARB + `intl_utils`; English, German, Portuguese, Ukrainian, Arabic (RTL demo)      |
-| Images               | `cached_network_image`                                                             |
-| Testing              | `bloc_test`, `mocktail`, sample tests under `test/`                                |
+| Concern | Pattern |
+| --- | --- |
+| State | `flutter_bloc` with Bloc/Cubit |
+| Routing | `go_router` with route constants |
+| Network | `dio`, `retrofit`, retry/connectivity/logging interceptors |
+| Errors | `Failure` hierarchy and `Result<T> = Either<Failure, T>` |
+| DI | `get_it` plus `injectable` modules/codegen |
+| Storage | `shared_preferences` theme storage |
+| Theme | Material 3 theme generated from one seed color |
+| Localization | ARB + `intl_utils` |
+| Flavors | `dev`, `qa`, `prod` entrypoints and native configs |
+| Testing | Flutter test setup with a connectivity banner test |
 
-## Project layout
+## Structure
 
-```
+```text
 lib/
-  app/                 # MaterialApp.router, lifecycle, localization
-  app_runner.dart      # runZonedGuarded entry point
-  bloc/theme/          # Global ThemeCubit + AppTheme enum
-  config/              # AppConfig, BuildType, Environment, FeatureFlags
-  constants/           # Dimens, icons
+  app/                         App shell, localization, lifecycle
+  app_runner.dart              Error boundary, DI init, runApp
+  bloc/theme/                  Global ThemeCubit
+  config/                      AppConfig, Environment, BuildType, FeatureFlags
   data/
-    auth/              # TokenStorage, AuthDataSource (mock-backed example)
-    failure/           # Failure hierarchy + DioException → Failure mapper
+    failure/                   Failure and error mapper
     network/
-      data_source/     # *DataSource abstractions
-      interceptors/    # Auth, retry, connectivity, error mapper
-      model/           # Network DTOs (retrofit + json_serializable)
-      service/         # @RestApi services
-    theme_storage.dart # Persists the user's AppTheme
-  di/                  # @module classes + initDI()
+      data_source/             Add API data sources here
+      interceptors/            Dio interceptors
+      model/                   Add network DTOs here
+      service/                 Add retrofit services here
+    theme_storage.dart
+  di/                          Injectable modules
   features/
-    <feature>/
-      bloc/            # Feature bloc(s)
-      view/            # Screens
-      widget/          # Feature-private widgets
-      model/           # Feature-private models (e.g. formz inputs)
-  l10n/                # ARB sources
-  models/              # Domain resources shared across features
-  repository/          # Domain-facing repositories
-  routes/router.dart   # AppRoutes + buildRouter(authBloc)
-  theme/               # MaterialTheme (seed-based)
-  widgets/             # Cross-feature widgets
+    home/                      Offline starter screen
+    settings/                  Theme settings screen
+  models/                      Add domain resources here
+  repository/                  Add repository contracts/impls here
+  routes/router.dart
+  theme/
+  utils/
+  widgets/
 ```
 
-### Pattern to follow when adding a feature
-
-1. Create `lib/features/<name>/` with `bloc/`, `view/`, `widget/`, `model/`.
-2. If you need new data, add `lib/data/network/service/<name>/` for the
-   retrofit service and `lib/data/network/data_source/` for the wrapper that
-   returns `Future<Result<T>>`.
-3. Add a `lib/repository/<name>_repository.dart` that converts DTOs to
-   domain resources.
-4. Register the new types in the matching `lib/di/di_*_module.dart` so
-   `build_runner` wires them up.
-5. Add a route in `lib/routes/router.dart`. If the screen lives behind the
-   bottom-nav, add it to the `ShellRoute` block; otherwise add a top-level
-   `GoRoute`.
-
-## Build & run
+## Create a New Project From This Template
 
 ```bash
-# install deps
-flutter pub get
-
-# run codegen (freezed, json_serializable, retrofit, injectable, flutter_gen)
-dart run build_runner build --delete-conflicting-outputs
-
-# flavored launch
-flutter run -t lib/main_dev.dart  --flavor dev
-flutter run -t lib/main_qa.dart   --flavor qa
-flutter run -t lib/main_prod.dart --flavor prod
-
-# tests
-flutter test
-flutter analyze
+dart run tool/template_cli.dart \
+  --project-name my_app \
+  --package-name com.example.my_app \
+  --output ../my_app
 ```
 
-`Makefile` has shortcuts for the common loops (`make`, `make gen`,
-`make localize`, `make check`).
+Options:
 
-## Flavors
+```text
+--project-name   Dart package/app name, snake_case, for example my_app
+--package-name   Native package id, for example com.example.my_app
+--output         Target directory for the generated project
+--force          Replace output directory if it already exists
+```
 
-Each `main_*.dart` calls `Environment.init` with a `BuildType` and an
-`AppConfig`. Override `apiBaseUrl`, `sentryDsn`, and static feature-flag
-defaults per flavor — the rest of the app reads them via DI.
+Then run:
 
-## Demo credentials
+```bash
+cd ../my_app
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
+flutter test
+```
 
-The mock `AuthDataSource` accepts **any well-formed email plus a password of
-at least 6 characters** (e.g. `demo@example.com` / `secret1`). Replace
-`MockAuthDataSource` with a real retrofit service when wiring a backend; the
-rest of the auth pipeline stays untouched.
+## Run This Template
 
-## Rebranding
+```bash
+flutter pub get
+flutter run -t lib/main_dev.dart --flavor dev
+```
 
-Open [lib/theme/style.dart](lib/theme/style.dart#L4) and change `kBrandSeed`.
-Material 3 derives the full light/dark palette from that one color.
+Other flavors:
+
+```bash
+flutter run -t lib/main_qa.dart --flavor qa
+flutter run -t lib/main_prod.dart --flavor prod
+```
+
+VS Code launch configs are already set up in `.vscode/launch.json`.
+
+## Add a Feature
+
+Create a vertical slice:
+
+```text
+lib/features/<name>/
+  bloc/
+  view/
+  widget/
+  model/
+```
+
+For API-backed features, add:
+
+```text
+lib/data/network/model/<name>/
+lib/data/network/service/<name>/
+lib/data/network/data_source/<name>_network_data_source.dart
+lib/models/<name>/
+lib/repository/<name>_repository.dart
+```
+
+Register services/data sources in `lib/di/di_network_module.dart`, register
+repositories in `lib/di/di_repository_module.dart`, and rerun codegen.
+
+## Codegen
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+flutter pub run intl_utils:generate
+fluttergen -c pubspec.yaml
+```
+
+## Checks
+
+```bash
+flutter analyze
+flutter test
+```
+
+## Rebrand
+
+- App title: `lib/l10n/intl_en.arb`
+- Package name: use `tool/template_cli.dart`
+- Theme seed: `lib/theme/style.dart`
+- API base URL: `lib/main_dev.dart`, `lib/main_qa.dart`, `lib/main_prod.dart`

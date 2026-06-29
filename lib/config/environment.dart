@@ -7,8 +7,8 @@ import 'package:talker_bloc_logger/talker_bloc_logger_observer.dart';
 /// build types.
 class Environment<T> implements Listenable {
   Environment._(this._currentBuildType, T config)
-      : _config = ValueNotifier<T>(config),
-        _listeners = [];
+    : _config = ValueNotifier<T>(config),
+      _listeners = [];
 
   /// Creates a new instance of [Environment].
   factory Environment.instance() => _instance as Environment<T>;
@@ -59,10 +59,7 @@ class Environment<T> implements Listenable {
   ///
   /// This method should be called once at the app's initialization to set up
   /// the environment configuration.
-  static void init<T>({
-    required BuildType buildType,
-    required T config,
-  }) {
+  static void init<T>({required BuildType buildType, required T config}) {
     _instance ??= Environment<T>._(buildType, config);
     Bloc.observer = TalkerBlocObserver();
   }

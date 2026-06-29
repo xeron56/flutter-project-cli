@@ -5,9 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('ConnectivityBanner renders its child', (tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: ConnectivityBanner(child: Text('hello')),
-      ),
+      const MaterialApp(home: ConnectivityBanner(child: Text('hello'))),
     );
     expect(find.text('hello'), findsOneWidget);
   });

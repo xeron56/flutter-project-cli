@@ -1,5 +1,5 @@
-.PHONY: gen genAll rebuild check get localize runDev runDevQa runDevStaging runProdRelease \
-        release apk lines force_upgrade integration_test
+.PHONY: gen genAll rebuild check get localize runDev runQa runProd runProdRelease \
+        release apk debug_apk lines force_upgrade integration_test screenshot_test
 
 # Clean project, install dependencies & generate sources
 rebuild:
@@ -29,23 +29,23 @@ check:
 
 # Run with flavors
 runDev:
-	flutter run --flavor dev -t lib/main.dart
+	flutter run --flavor dev -t lib/main_dev.dart
 
-runDevQa:
-	flutter run --flavor dev -t lib/main_qa.dart
+runQa:
+	flutter run --flavor qa -t lib/main_qa.dart
 
-runDevStaging:
-	flutter run --flavor dev -t lib/main_staging.dart
+runProd:
+	flutter run --flavor prod -t lib/main_prod.dart
 
 release:
-	flutter run --release -t lib/main_prod.dart
+	flutter run --flavor prod --release -t lib/main_prod.dart
 
 runProdRelease:
 	flutter run --flavor prod --release -t lib/main_prod.dart
 
 # Build release APK
 apk:
-	flutter build apk --flavor dev --release -t lib/main_prod.dart
+	flutter build apk --flavor prod --release -t lib/main_prod.dart
 
 # Build debug APK
 debug_apk:

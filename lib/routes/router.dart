@@ -1,13 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc_app_template/features/launch/view/launch_screen.dart';
+import 'package:flutter_bloc_app_template/features/home/view/home_screen.dart';
+import 'package:flutter_bloc_app_template/features/settings/view/settings_screen.dart';
 import 'package:go_router/go_router.dart';
 
 abstract final class AppRoutes {
   static const home = '/';
-  static const launchDetail = '/launch/:flightNumber';
-
-  static String launchFor(int flightNumber) => '/launch/$flightNumber';
+  static const settings = '/settings';
 }
 
 final appRouter = GoRouter(
@@ -16,16 +15,11 @@ final appRouter = GoRouter(
   routes: [
     GoRoute(
       path: AppRoutes.home,
-      pageBuilder: (_, state) =>
-          _fadeTransition(state, const LaunchScreen(flightNumber: 1)),
+      pageBuilder: (_, state) => _fadeTransition(state, const HomeScreen()),
     ),
     GoRoute(
-      path: AppRoutes.launchDetail,
-      builder: (_, state) {
-        final raw = state.pathParameters['flightNumber'];
-        final flightNumber = int.tryParse(raw ?? '') ?? 1;
-        return LaunchScreen(flightNumber: flightNumber);
-      },
+      path: AppRoutes.settings,
+      pageBuilder: (_, state) => _fadeTransition(state, const SettingsScreen()),
     ),
   ],
   errorBuilder: (_, state) => _NotFoundScreen(uri: state.uri.toString()),

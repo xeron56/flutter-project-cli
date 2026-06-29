@@ -10,8 +10,8 @@ class FeatureFlags {
   FeatureFlags({
     required SharedPreferences prefs,
     Map<String, bool> staticOverrides = const {},
-  })  : _prefs = prefs,
-        _staticOverrides = staticOverrides;
+  }) : _prefs = prefs,
+       _staticOverrides = staticOverrides;
 
   static const _prefix = 'flag.';
 

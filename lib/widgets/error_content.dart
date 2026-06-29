@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc_app_template/index.dart';
 
 class ErrorContent extends StatelessWidget {
-  const ErrorContent({
-    super.key,
-    this.onTryAgainClick = _noop,
-  });
+  const ErrorContent({super.key, this.onTryAgainClick = _noop});
 
   final VoidCallback onTryAgainClick;
 
@@ -17,9 +14,7 @@ class ErrorContent extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: onTryAgainClick,
-          child: Text(
-            context.tryAgainButton,
-          ),
+          child: Text(context.tryAgainButton),
         ),
       ),
     );

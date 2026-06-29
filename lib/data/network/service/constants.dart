@@ -1,6 +1,4 @@
-/// Default base url used when an environment doesn't set one.
+/// Placeholder base URL used until a project wires its real backend.
 ///
-/// Real flavors should pass their own url via `AppConfig.apiBaseUrl` from the
-/// matching `main_*.dart` entry point. This default keeps the SpaceX example
-/// in `LaunchService` working out of the box.
-const String defaultApiBaseUrl = 'https://api.spacexdata.com/v3/';
+/// Override this per flavor in the matching `main_*.dart` file.
+const String defaultApiBaseUrl = 'https://api.example.com/';

@@ -1,5 +1,5 @@
 /// Extension on [String] to provide formatting functions for names.
-extension DateFormatExtension on String {
+extension StringFormatExtension on String {
   /// Returns a formatted version of the name by extracting the first letters
   /// of the provided words. If the string is empty, returns 'N/A'.
   ///
@@ -33,10 +33,4 @@ extension DateFormatExtension on String {
     final initials = words.map((word) => word.isNotEmpty ? word[0] : '').join();
     return initials.toUpperCase();
   }
-}
-
-String formatRocketCost(int? costPerLaunch) {
-  if (costPerLaunch == null || costPerLaunch == 0) return '\$0';
-  final millions = costPerLaunch / 1000000;
-  return '\$${millions.toStringAsFixed(1)}M';
 }

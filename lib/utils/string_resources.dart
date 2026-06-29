@@ -6,8 +6,6 @@ extension LocalizationExtension on BuildContext {
 }
 
 extension StringResourcesExtension on BuildContext {
-  String get appearanceSettingsItem => l10n.appearanceSettingsItem;
-
   String get appTitle => l10n.appTitle;
 
   String get appearanceTitle => l10n.appearanceTitle;
@@ -28,30 +26,9 @@ extension StringResourcesExtension on BuildContext {
   String get darkThemeFollowSystemSettingsItemTitle =>
       l10n.darkThemeFollowSystemSettingsItemTitle;
 
-  String get emailsTitle => l10n.emailsTitle;
-
-  String get rocketsTab => l10n.rocketsTab;
-
-  String get coresLabel => l10n.coresLabel;
-
   String get settingsTitle => l10n.settingsTitle;
 
   String get emptyList => l10n.emptyList;
 
-  String get launchesTitle => l10n.launchesTitle;
-
-  String get rocketsTitle => l10n.rocketsTitle;
-
   String get tryAgainButton => l10n.tryAgainButton;
-
-  String get aboutSettingsItem => l10n.aboutSettingsItem;
-
-  String get aboutSettingsItemDescription => l10n.aboutSettingsItemDescription;
-
-  String launchedAt(Object launchedAt) {
-    return l10n.launchedAt(launchedAt);
-  }
-
-  String get appearanceSettingsItemDescription =>
-      l10n.appearanceSettingsItemDescription;
 }

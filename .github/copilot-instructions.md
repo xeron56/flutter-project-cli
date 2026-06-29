@@ -1,243 +1,209 @@
-# Flutter BLoC Template — AI Instructions
+# Flutter BLoC Template Agent Instructions
 
-You are extending a Flutter starter template. Follow the patterns documented
-here exactly; the template is small on purpose so that AI-generated code stays
-consistent. If something here conflicts with what you "usually" do, the
-template wins.
+This repository is an empty Flutter application template. It intentionally has
+no product-specific UI, no demo API, and no sample domain models. Keep it that
+way unless the user asks for a real feature.
 
----
+Use the existing architecture exactly. The template is small so AI agents can
+understand it quickly and generate consistent code.
 
 ## Stack
 
-- **State**: `flutter_bloc` (Bloc + Cubit), `freezed` for sealed states.
-- **Routing**: `go_router` with a shell route for bottom-nav tabs.
-- **DI**: `get_it` + `injectable` (codegen via `injectable_generator`).
-- **Networking**: `dio` + `retrofit` (codegen via `retrofit_generator`). Base URL comes from `AppConfig` via DI.
-- **Error model**: sealed `Failure` + `Either<Failure, T>` (alias `Result<T>` from `dartz`).
-- **Storage**: `shared_preferences` for user preferences.
-- **Theme**: `ColorScheme.fromSeed` — single seed color in `lib/theme/style.dart`.
-- **Networking polish**: `connectivity_plus` offline banner.
+- Flutter + Material 3
+- `flutter_bloc` for app and feature state
+- `freezed` for sealed feature events/states and immutable DTOs
+- `go_router` for navigation
+- `dio` + `retrofit` for REST APIs
+- `dartz` `Either<Failure, T>` through the `Result<T>` alias
+- `get_it` + `injectable` for dependency injection
+- `shared_preferences` for simple local preferences
+- `connectivity_plus` for the global offline banner
+- `intl_utils`/ARB for localization
 
----
+## Project Shape
 
-## Layered architecture
-
+```text
+lib/
+  app/                         App shell, localization delegates, lifecycle
+  app_runner.dart              Bootstraps Flutter, DI, error reporting
+  bloc/theme/                  Global ThemeCubit and AppTheme enum
+  config/                      AppConfig, Environment, BuildType, FeatureFlags
+  constants/                   Small shared constants and Material icon aliases
+  data/
+    failure/                   Failure hierarchy and Dio error mapper
+    network/
+      converter/               Shared JSON converters
+      data_source/             Add data-source wrappers here
+      interceptors/            Connectivity, retry, and logging interceptors
+      model/                   Add Network*Model DTOs here
+      service/                 Add retrofit @RestApi services here
+    theme_storage.dart         Theme persistence implementation
+  di/                          Injectable modules and generated DI config
+  features/
+    home/view/home_screen.dart Tiny offline starter screen
+    settings/view/             Theme settings screen
+    <feature>/                 Add real feature folders here
+  l10n/                        ARB localization sources
+  models/                      Add shared domain resources here
+  repository/                  Domain-facing repository contracts/impls
+  routes/router.dart           AppRoutes and GoRouter setup
+  theme/                       Generated Material theme and brand seed
+  utils/                       Small cross-feature utilities
+  widgets/                     Shared loading/error/empty/connectivity widgets
 ```
-UI (feature/view)         ──watches──▶  Bloc/Cubit
-Bloc/Cubit                ──calls───▶  Repository
-Repository                ──calls───▶  DataSource
-DataSource                ──wraps──▶  retrofit @RestApi() service
-```
 
-Rules:
+Empty folders with `.gitkeep` are intentional. They show where future API and
+domain code should go.
 
-- **Data sources** return `Future<Result<T>>`. Catch exceptions inside the
-  datasource and pass them through `mapErrorToFailure(...)`. Never let
-  exceptions escape the data layer.
-- **Repositories** return `Future<Result<DomainResource>>`. Convert
-  `Network*Model` DTOs to domain `*Resource` types via `.toResource()`.
-- **Blocs** consume `Result<T>` with `.fold((failure) => ..., (data) => ...)`.
-  Emit typed freezed states carrying the `Failure` on error, never a plain
-  `String`.
-- Never `throw` across layer boundaries.
-- Never put a `try/catch` in a bloc.
-- Never call `Dio` or a retrofit service directly from a bloc or a screen.
+## Required Feature Pattern
 
----
+Create every real feature as a vertical slice:
 
-## Folder layout for a new feature
-
-```
+```text
 lib/features/<name>/
-  bloc/        ← <Name>Bloc, <Name>Event, <Name>State (freezed)
-  view/        ← screens / pages
-  widget/      ← feature-private widgets
+  bloc/
+    <name>_bloc.dart
+    <name>_event.dart
+    <name>_state.dart
+  view/
+    <name>_screen.dart
+  widget/
+  model/
 ```
 
-If the feature needs new data:
+Use screen-local blocs by default:
 
-```
-lib/data/network/service/<name>/   ← retrofit @RestApi() class + generated .g.dart
-lib/data/network/model/<name>/     ← freezed + json_serializable Network*Model DTOs
-lib/data/network/data_source/      ← <Name>DataSource abstract + impl
-lib/repository/<name>_repository.dart
-lib/models/<name>/                 ← domain *Resource types (pure Dart, no JSON)
+```dart
+return BlocProvider(
+  create: (context) => ExampleBloc(
+    RepositoryProvider.of<ExampleRepository>(context),
+  )..add(const ExampleLoadEvent()),
+  child: const ExampleView(),
+);
 ```
 
-After adding new injectable / freezed / retrofit / json_serializable classes run:
+Only add a bloc to `lib/di/app_bloc_providers.dart` when it must be app-scoped
+and survive navigation.
 
+## API Pattern
+
+For API-backed features, add files in this order:
+
+1. `lib/data/network/model/<feature>/network_<feature>_model.dart`
+2. `lib/data/network/service/<feature>/<feature>_service.dart`
+3. `lib/data/network/data_source/<feature>_network_data_source.dart`
+4. `lib/models/<feature>/<feature>_resource.dart`
+5. `lib/models/<feature>/<feature>_ext.dart`
+6. `lib/repository/<feature>_repository.dart`
+7. Register service/data source in `lib/di/di_network_module.dart`
+8. Register repository in `lib/di/di_repository_module.dart`
+9. Expose repository in `lib/di/app_repository_providers.dart` if screens use
+   `RepositoryProvider.of<T>(context)`
+
+Data sources must catch exceptions and return `Result<T>`:
+
+```dart
+class ExampleNetworkDataSource implements ExampleDataSource {
+  ExampleNetworkDataSource(this._service);
+
+  final ExampleService _service;
+
+  @override
+  Future<Result<NetworkExampleModel>> getExample(String id) async {
+    try {
+      return Right(await _service.fetchExample(id));
+    } catch (error, stackTrace) {
+      return Left(mapErrorToFailure(error, stackTrace));
+    }
+  }
+}
 ```
+
+Repositories convert DTOs to domain resources and also return `Result<T>`:
+
+```dart
+class ExampleRepositoryImpl implements ExampleRepository {
+  ExampleRepositoryImpl(this._dataSource);
+
+  final ExampleDataSource _dataSource;
+
+  @override
+  Future<Result<ExampleResource>> getExample(String id) async {
+    final result = await _dataSource.getExample(id);
+    return result.map((model) => model.toResource());
+  }
+}
+```
+
+Blocs fold results. Do not put `try/catch` in blocs:
+
+```dart
+final result = await _repository.getExample(event.id);
+emit(
+  result.fold(
+    (failure) => ExampleState.error(failure: failure),
+    (data) => ExampleState.success(data: data),
+  ),
+);
+```
+
+## Routing
+
+Routes live only in `lib/routes/router.dart`.
+
+- Add route constants to `AppRoutes`.
+- Use `context.go(AppRoutes.someRoute)` or helper methods like
+  `AppRoutes.detailFor(id)`.
+- Do not navigate with raw string literals from screens.
+- Keep `/` as the offline template home until the real app has a home feature.
+
+## DI and Code Generation
+
+After adding or changing any `@module`, `@injectable`, `@RestApi`, `@freezed`,
+or `json_serializable` model, run:
+
+```bash
 dart run build_runner build --delete-conflicting-outputs
 ```
 
----
+Generated files are committed in this template. Do not hand-edit generated
+files unless generation is unavailable and the user approves.
 
-## Retrofit service pattern
+## Flavors
 
-```dart
-// lib/data/network/service/foo/foo_service.dart
-@RestApi()
-abstract class FooService {
-  factory FooService(Dio dio) = _FooService;
+Entrypoints:
 
-  @GET('foo/{id}')
-  Future<NetworkFooModel> fetchFoo(@Path('id') int id);
+- `lib/main.dart`: default local debug entrypoint
+- `lib/main_dev.dart`: dev flavor
+- `lib/main_qa.dart`: QA flavor
+- `lib/main_prod.dart`: production flavor
 
-  @GET('foo')
-  Future<List<NetworkFooModel>> fetchAll();
-}
+Each entrypoint initializes `Environment` with `AppConfig`. Put real API base
+URLs there when a project has a backend.
+
+VS Code launch configs are in `.vscode/launch.json`.
+
+## Template CLI
+
+Use `tool/template_cli.dart` to create a new project from this template:
+
+```bash
+dart run tool/template_cli.dart \
+  --project-name my_app \
+  --package-name com.example.my_app \
+  --output ../my_app
 ```
 
-Register in `NetworkModule` (`lib/di/di_network_module.dart`):
+The CLI copies the template, skips build/cache/git files, renames Dart package
+imports, Android namespace/applicationId, Kotlin package folders, iOS bundle
+identifiers, and visible template names.
 
-```dart
-@lazySingleton
-FooService provideFooService(Dio dio) => FooService(dio);
+## What Not To Do
 
-@lazySingleton
-FooDataSource provideFooDataSource(FooService svc) => FooNetworkDataSource(svc);
-```
-
----
-
-## DI module pattern
-
-```dart
-// lib/di/di_repository_module.dart
-@module
-abstract class RepositoryModule {
-  @factoryMethod
-  FooRepository provideFooRepository(FooDataSource ds) =>
-      FooRepositoryImpl(ds);
-}
-```
-
-Expose a feature bloc in `lib/di/app_bloc_providers.dart` only if it must
-survive navigation (app-scoped). If it's screen-local, create it with
-`BlocProvider(create: ...)` inside the screen widget instead.
-
----
-
-## Routing pattern
-
-Routes live in `lib/routes/router.dart` as constants on `AppRoutes`.
-The router is a top-level `final appRouter = GoRouter(...)` singleton.
-
-```dart
-// Adding a new route
-abstract final class AppRoutes {
-  static const foo = '/foo';
-  static const fooDetail = '/foo/:id';
-  static String fooFor(int id) => '/foo/$id';
-}
-```
-
-Navigate with:
-
-```dart
-context.go(AppRoutes.foo);
-context.go(AppRoutes.fooFor(7));
-```
-
-Screens that belong in the bottom-nav go under the `ShellRoute`.
-Full-screen detail pages go as top-level `GoRoute`s (no bottom-nav).
-
----
-
-## Bloc state pattern (freezed)
-
-```dart
-// lib/features/foo/bloc/foo_state.dart
-part of 'foo_bloc.dart';
-
-@Freezed()
-abstract class FooState with _$FooState {
-  const factory FooState.loading() = FooLoadingState;
-  const factory FooState.success({required FooResource data}) = FooSuccessState;
-  const factory FooState.error({required Failure failure}) = FooErrorState;
-}
-```
-
-Bloc:
-
-```dart
-class FooBloc extends Bloc<FooEvent, FooState> {
-  FooBloc(this._repository) : super(const FooState.loading()) {
-    on<FooLoadEvent>(_onLoad);
-  }
-
-  final FooRepository _repository;
-
-  Future<void> _onLoad(FooLoadEvent event, Emitter<FooState> emit) async {
-    emit(const FooState.loading());
-    final result = await _repository.getFoo(event.id);
-    emit(result.fold(
-      (failure) => FooState.error(failure: failure),
-      (data)    => FooState.success(data: data),
-    ));
-  }
-}
-```
-
-UI:
-
-```dart
-BlocBuilder<FooBloc, FooState>(
-  builder: (context, state) {
-    if (state is FooLoadingState) return const LoadingContent();
-    if (state is FooErrorState)   return ErrorContent(onTryAgainClick: ...);
-    if (state is FooSuccessState) return FooView(data: state.data);
-    return const SizedBox.shrink();
-  },
-)
-```
-
----
-
-## Flavors / config
-
-Each `main_*.dart` calls `Environment.init` with an `AppConfig`. Read it via:
-
-```dart
-final config = Environment<AppConfig>.instance().config;
-```
-
-To use a different API base URL per flavor, change `apiBaseUrl` in the matching
-`main_*.dart`.
-
----
-
-## Theme
-
-Open `lib/theme/style.dart` and change `kBrandSeed`. Material 3 derives the
-rest automatically. Do not hand-pick palette swatches.
-
-User preference is stored as the `AppTheme` enum (`system` / `light` / `dark`)
-via `ThemeCubit` → `ThemeRepository` → `SharedPreferencesThemeStorage`.
-
----
-
-## What NOT to do
-
-- ❌ Don't introduce other state-management libraries (no Provider-only, no Riverpod) — use Bloc/Cubit.
-- ❌ Don't call retrofit services or `Dio` from blocs or screens.
-- ❌ Don't throw exceptions across layer boundaries — return `Left(Failure(...))`.
-- ❌ Don't use raw route strings — use `AppRoutes` constants.
-- ❌ Don't put business logic in `index.dart` — it is a barrel re-exports file only.
-- ❌ Don't extend the launch feature — treat it as a *read-only pattern reference*.
-
----
-
-## Reference: existing launch feature
-
-The launch feature is the canonical example of every pattern in this template:
-
-| File | Shows |
-|------|-------|
-| `lib/data/network/service/launch/launch_service.dart` | retrofit `@RestApi()` |
-| `lib/data/network/data_source/launches_network_data_source.dart` | DataSource impl |
-| `lib/repository/launches_repository.dart` | Repository + `Result<T>` |
-| `lib/features/launch/bloc/launch_bloc.dart` | Bloc + freezed states |
-| `lib/features/launch/view/launch_screen.dart` | BlocBuilder + state pattern |
-
-When adding a new feature, copy this structure — don't modify these files.
+- Do not re-add demo APIs or sample product screens.
+- Do not call `Dio` or retrofit services from UI or blocs.
+- Do not throw exceptions across data/repository/bloc boundaries.
+- Do not introduce another state-management library.
+- Do not put business logic in `index.dart`; it is only a barrel.
+- Do not place feature-private widgets in `lib/widgets`.
+- Do not leave `build_runner` outputs stale after adding generated types.

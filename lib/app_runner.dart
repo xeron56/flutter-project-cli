@@ -15,31 +15,26 @@ import 'package:flutter_bloc_app_template/di/di_initializer.dart';
 /// All uncaught errors are funneled into `_reportError` — wire your crash
 /// reporter (Sentry, Crashlytics) there.
 Future<void> run([
-  List<DeviceOrientation> orientations = const [
-    DeviceOrientation.portraitUp,
-  ],
+  List<DeviceOrientation> orientations = const [DeviceOrientation.portraitUp],
 ]) async {
-  await runZonedGuarded<Future<void>>(
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
-      FlutterError.onError = (details) {
-        FlutterError.presentError(details);
-        _reportError(details.exception, details.stack);
-      };
-      PlatformDispatcher.instance.onError = (error, stack) {
-        _reportError(error, stack);
-        return true;
-      };
+  await runZonedGuarded<Future<void>>(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    FlutterError.onError = (details) {
+      FlutterError.presentError(details);
+      _reportError(details.exception, details.stack);
+    };
+    PlatformDispatcher.instance.onError = (error, stack) {
+      _reportError(error, stack);
+      return true;
+    };
 
-      await SystemChrome.setPreferredOrientations(orientations);
+    await SystemChrome.setPreferredOrientations(orientations);
 
-      final buildType = env.Environment<AppConfig>.instance().buildType.name;
-      await initDI(diContainer, buildType);
+    final buildType = env.Environment<AppConfig>.instance().buildType.name;
+    await initDI(diContainer, buildType);
 
-      runApp(const App());
-    },
-    _reportError,
-  );
+    runApp(const App());
+  }, _reportError);
 }
 
 void _reportError(Object error, StackTrace? stack) {
