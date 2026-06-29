@@ -56,7 +56,7 @@ lib/
 # Refresh the CLI from GitHub, then create a project.
 flutter pub global activate --source git \
   https://github.com/xeron56/flutter-project-cli.git && \
-flutter pub global run flutter_bloc_app_template:flutter_project_cli \
+"$HOME/.pub-cache/bin/flutter_project_cli" \
   --project-name my_app \
   --package-name com.example.my_app \
   --output ../my_app
@@ -71,7 +71,7 @@ Options:
 --force          Replace output directory if it already exists
 ```
 
-For a shorter command after activation, add Dart pub cache executables to your
+For a shorter command after activation, add Flutter/Dart pub cache executables to your
 shell path:
 
 ```bash

@@ -190,7 +190,7 @@ Refresh the CLI from GitHub and create a project:
 ```bash
 flutter pub global activate --source git \
   https://github.com/xeron56/flutter-project-cli.git && \
-flutter pub global run flutter_bloc_app_template:flutter_project_cli \
+"$HOME/.pub-cache/bin/flutter_project_cli" \
   --project-name my_app \
   --package-name com.example.my_app \
   --output ../my_app

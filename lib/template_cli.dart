@@ -58,6 +58,7 @@ Future<void> runTemplateCli(List<String> args) async {
 
   _copyDirectory(source, output);
   _replaceText(output, options);
+  _removeTemplateOnlyPubspecEntries(output);
   _sortDartImports(output);
   _moveKotlinPackages(output, options.packageName!);
 
@@ -137,6 +138,10 @@ bool _shouldSkip(String name, String path) {
   };
 
   if (skippedNames.contains(name)) return true;
+  if (name == 'template_cli.dart' &&
+      path.contains('${Platform.pathSeparator}lib${Platform.pathSeparator}')) {
+    return true;
+  }
   if (name.endsWith('.iml')) return true;
   if (path.contains('${Platform.pathSeparator}.kotlin')) return true;
   return false;
@@ -177,6 +182,20 @@ void _replaceText(Directory root, _Options options) {
     if (updated != original) {
       file.writeAsStringSync(updated);
     }
+  }
+}
+
+void _removeTemplateOnlyPubspecEntries(Directory root) {
+  final pubspec = File('${root.path}${Platform.pathSeparator}pubspec.yaml');
+  if (!pubspec.existsSync()) return;
+
+  final original = pubspec.readAsStringSync();
+  final updated = original.replaceFirst(
+    RegExp(r'\nexecutables:\n  flutter_project_cli: flutter_project_cli\n'),
+    '\n',
+  );
+  if (updated != original) {
+    pubspec.writeAsStringSync(updated);
   }
 }
 
