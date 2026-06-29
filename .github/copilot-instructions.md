@@ -1,11 +1,25 @@
 # Flutter BLoC Template Agent Instructions
 
-This repository is an empty Flutter application template. It intentionally has
-no product-specific UI, no demo API, and no sample domain models. Keep it that
-way unless the user asks for a real feature.
+These instructions are for any AI coding agent working in this repository:
+Codex, Claude, GitHub Copilot, Cursor, Windsurf, Gemini, or another assistant.
 
-Use the existing architecture exactly. The template is small so AI agents can
-understand it quickly and generate consistent code.
+This repository is an empty Flutter application template. It intentionally has
+no product-specific UI, no demo API, and no sample domain models. Preserve that
+unless the user explicitly asks for a real feature.
+
+## Agent Operating Rules
+
+- Read the relevant files before editing. Do not guess project structure.
+- Keep changes scoped to the user request.
+- Prefer existing patterns over new abstractions.
+- Do not silently remove user changes or unrelated files.
+- Run `flutter analyze` and relevant tests after code changes when practical.
+- If generated files become stale, run code generation instead of hand-editing
+  generated output.
+- For UI work, build the actual screen/flow, not a marketing landing page.
+- For API work, keep networking out of screens and blocs.
+- For template work, avoid adding sample business domains, fake APIs, or demo
+  product screens.
 
 ## Stack
 
@@ -18,7 +32,7 @@ understand it quickly and generate consistent code.
 - `get_it` + `injectable` for dependency injection
 - `shared_preferences` for simple local preferences
 - `connectivity_plus` for the global offline banner
-- `intl_utils`/ARB for localization
+- ARB + `intl_utils`/Flutter localization generation
 
 ## Project Shape
 
@@ -34,7 +48,7 @@ lib/
     network/
       converter/               Shared JSON converters
       data_source/             Add data-source wrappers here
-      interceptors/            Connectivity, retry, and logging interceptors
+      interceptors/            Connectivity, retry, logging interceptors
       model/                   Add Network*Model DTOs here
       service/                 Add retrofit @RestApi services here
     theme_storage.dart         Theme persistence implementation
@@ -47,7 +61,7 @@ lib/
   models/                      Add shared domain resources here
   repository/                  Domain-facing repository contracts/impls
   routes/router.dart           AppRoutes and GoRouter setup
-  theme/                       Generated Material theme and brand seed
+  theme/                       Material theme and brand seed
   utils/                       Small cross-feature utilities
   widgets/                     Shared loading/error/empty/connectivity widgets
 ```
@@ -157,13 +171,30 @@ Routes live only in `lib/routes/router.dart`.
 - Do not navigate with raw string literals from screens.
 - Keep `/` as the offline template home until the real app has a home feature.
 
-## DI and Code Generation
+## Dependency Injection
 
-After adding or changing any `@module`, `@injectable`, `@RestApi`, `@freezed`,
-or `json_serializable` model, run:
+DI uses `get_it` + `injectable`.
+
+- Register network services/data sources in `lib/di/di_network_module.dart`.
+- Register repositories in `lib/di/di_repository_module.dart`.
+- Register app-wide blocs/cubits in `lib/di/app_bloc_providers.dart`.
+- Screen-local blocs should be created inside the screen with `BlocProvider`.
+- Do not manually edit `lib/di/di_initializer.config.dart`.
+
+## Code Generation
+
+Run code generation after adding or changing any `@module`, `@injectable`,
+`@RestApi`, `@freezed`, or `json_serializable` model:
 
 ```bash
 dart run build_runner build --delete-conflicting-outputs
+```
+
+Run localization generation after changing ARB files:
+
+```bash
+flutter gen-l10n
+flutter pub run intl_utils:generate
 ```
 
 Generated files are committed in this template. Do not hand-edit generated
@@ -200,6 +231,28 @@ The CLI copies the template, skips build/cache/git files, renames Dart package
 imports, Android namespace/applicationId, Kotlin package folders, iOS bundle
 identifiers, and visible template names.
 
+## Validation Checklist
+
+For most code changes, run:
+
+```bash
+flutter analyze
+flutter test
+```
+
+For new API models/services, also run:
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+For generated projects from the CLI, validate with:
+
+```bash
+flutter pub get
+flutter analyze
+```
+
 ## What Not To Do
 
 - Do not re-add demo APIs or sample product screens.
@@ -209,3 +262,16 @@ identifiers, and visible template names.
 - Do not put business logic in `index.dart`; it is only a barrel.
 - Do not place feature-private widgets in `lib/widgets`.
 - Do not leave `build_runner` outputs stale after adding generated types.
+- Do not make broad dependency upgrades unless the user asks for that.
+- Do not rename native packages manually; use the template CLI for new apps.
+
+## Notes For Specific Agents
+
+- Codex: use repository tools and terminal checks directly; keep edits small
+  and verify with `flutter analyze`/tests.
+- Claude: follow the file structure and result/error patterns exactly; do not
+  invent alternative state management or service layers.
+- GitHub Copilot/Copilot Chat: treat this file as the project source of truth
+  for generated suggestions.
+- Cursor/Windsurf/Gemini: prefer existing files as examples before creating new
+  abstractions.
