@@ -5,6 +5,9 @@ publish_to: 'none'
 
 version: 1.0.0+1
 
+executables:
+  flutter_project_cli: flutter_project_cli
+
 environment:
  sdk: ^3.11.4
 

@@ -185,10 +185,12 @@ VS Code launch configs are in `.vscode/launch.json`.
 
 ## Template CLI
 
-Use `tool/template_cli.dart` to create a new project from this template:
+Refresh the CLI from GitHub and create a project:
 
 ```bash
-dart run tool/template_cli.dart \
+flutter pub global activate --source git \
+  https://github.com/xeron56/flutter-project-cli.git && \
+flutter pub global run flutter_bloc_app_template:flutter_project_cli \
   --project-name my_app \
   --package-name com.example.my_app \
   --output ../my_app

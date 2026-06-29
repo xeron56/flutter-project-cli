@@ -53,7 +53,10 @@ lib/
 ## Create a New Project From This Template
 
 ```bash
-dart run tool/template_cli.dart \
+# Refresh the CLI from GitHub, then create a project.
+flutter pub global activate --source git \
+  https://github.com/xeron56/flutter-project-cli.git && \
+flutter pub global run flutter_bloc_app_template:flutter_project_cli \
   --project-name my_app \
   --package-name com.example.my_app \
   --output ../my_app
@@ -66,6 +69,22 @@ Options:
 --package-name   Native package id, for example com.example.my_app
 --output         Target directory for the generated project
 --force          Replace output directory if it already exists
+```
+
+For a shorter command after activation, add Dart pub cache executables to your
+shell path:
+
+```bash
+export PATH="$PATH:$HOME/.pub-cache/bin"
+```
+
+Then you can run:
+
+```bash
+flutter_project_cli \
+  --project-name my_app \
+  --package-name com.example.my_app \
+  --output ../my_app
 ```
 
 Then run:
@@ -136,6 +155,6 @@ flutter test
 ## Rebrand
 
 - App title: `lib/l10n/intl_en.arb`
-- Package name: use `tool/template_cli.dart`
+- Package name: use `flutter_project_cli`
 - Theme seed: `lib/theme/style.dart`
 - API base URL: `lib/main_dev.dart`, `lib/main_qa.dart`, `lib/main_prod.dart`
