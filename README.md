@@ -53,45 +53,84 @@ lib/
 
 ## Create a New Project From This Template
 
+### 1. Activate the CLI Globally
+
 ```bash
-# Refresh the CLI from GitHub, then create a project.
 flutter pub global activate --source git \
-  https://github.com/xeron56/flutter-project-cli.git && \
-"$HOME/.pub-cache/bin/flutter_project_cli" \
-  --project-name my_app \
-  --package-name com.example.my_app \
-  --output ../my_app
+  https://github.com/xeron56/flutter-project-cli.git
 ```
 
-Options:
+### 2. Generate a New Project
 
-```text
---project-name   Dart package/app name, snake_case, for example my_app
---package-name   Native package id, for example com.example.my_app
---output         Target directory for the generated project
---force          Replace output directory if it already exists
-```
+Run the generator in whichever directory you want your new app created:
 
-For a shorter command after activation, add Flutter/Dart pub cache executables to your
-shell path:
-
-```bash
-export PATH="$PATH:$HOME/.pub-cache/bin"
-```
-
-Then you can run:
-
+#### Windows (Command Prompt / PowerShell)
+If Pub cache is in your `PATH` (typically `%LOCALAPPDATA%\Pub\Cache\bin`):
 ```bash
 flutter_project_cli \
   --project-name my_app \
   --package-name com.example.my_app \
-  --output ../my_app
+  --output my_app
 ```
 
-Then run:
+Or run directly without PATH configuration:
+```powershell
+# PowerShell:
+& "$env:LOCALAPPDATA\Pub\Cache\bin\flutter_project_cli.bat" `
+  --project-name my_app `
+  --package-name com.example.my_app `
+  --output my_app
+
+# Or via dart pub:
+dart pub global run flutter_project_cli `
+  --project-name my_app `
+  --package-name com.example.my_app `
+  --output my_app
+```
+
+```cmd
+:: Command Prompt (CMD):
+"%LOCALAPPDATA%\Pub\Cache\bin\flutter_project_cli.bat" --project-name my_app --package-name com.example.my_app --output my_app
+```
+
+#### macOS / Linux
+If Pub cache is in your `PATH` (`$HOME/.pub-cache/bin`):
+```bash
+flutter_project_cli \
+  --project-name my_app \
+  --package-name com.example.my_app \
+  --output my_app
+```
+
+Or run directly without PATH configuration:
+```bash
+"$HOME/.pub-cache/bin/flutter_project_cli" \
+  --project-name my_app \
+  --package-name com.example.my_app \
+  --output my_app
+```
+
+### Options
+
+```text
+--project-name   Dart package/app name, snake_case, for example my_app
+--package-name   Native package id, for example com.example.my_app
+--output         Target directory for the generated project (for example my_app in the current directory)
+--force          Replace output directory if it already exists
+```
+
+### Adding Pub Cache Executables to PATH (Recommended)
+
+- **Windows**: Add `%LOCALAPPDATA%\Pub\Cache\bin` (e.g. `C:\Users\<username>\AppData\Local\Pub\Cache\bin`) to your User `PATH` environment variable.
+- **macOS / Linux**: Add to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.):
+  ```bash
+  export PATH="$PATH:$HOME/.pub-cache/bin"
+  ```
+
+### 3. Get Started with Your New App
 
 ```bash
-cd ../my_app
+cd my_app
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 flutter test
@@ -100,8 +139,12 @@ flutter run -t lib/main_dev.dart --flavor dev
 
 ### AI Agent / MCP Toolkit Setup (Optional)
 ```bash
-# 1. Install flutter-mcp-toolkit binary (macOS/Linux):
+# 1. Install flutter-mcp-toolkit binary:
+# macOS/Linux:
 curl -fsSL https://raw.githubusercontent.com/Arenukvern/mcp_flutter/main/install.sh | bash
+
+# Windows (or clone & build via 'make install'):
+# See https://github.com/Arenukvern/mcp_flutter
 
 # 2. Connect AI agent (Antigravity is preconfigured in .agents/skills/ & mcp.json):
 # For Codex:

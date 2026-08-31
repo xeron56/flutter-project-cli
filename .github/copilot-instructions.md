@@ -222,11 +222,13 @@ Refresh the CLI from GitHub and create a project:
 ```bash
 flutter pub global activate --source git \
   https://github.com/xeron56/flutter-project-cli.git && \
-"$HOME/.pub-cache/bin/flutter_project_cli" \
+flutter_project_cli \
   --project-name my_app \
   --package-name com.example.my_app \
-  --output ../my_app
+  --output my_app
 ```
+
+(On Windows without PATH setup: use `& "$env:LOCALAPPDATA\Pub\Cache\bin\flutter_project_cli.bat"` or `dart pub global run flutter_project_cli`.)
 
 The CLI copies the template, skips build/cache/git files, renames Dart package
 imports, Android namespace/applicationId, Kotlin package folders, iOS bundle

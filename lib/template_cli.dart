@@ -108,12 +108,12 @@ Usage:
   flutter_project_cli \\
     --project-name my_app \\
     --package-name com.example.my_app \\
-    --output ../my_app
+    --output my_app
 
 Options:
   --project-name   Dart package name in snake_case.
   --package-name   Native package id, for example com.example.my_app.
-  --output         Target directory.
+  --output         Target directory (for example my_app).
   --force          Delete the output directory first if it exists.
   --help           Print this help.
 ''');
