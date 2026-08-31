@@ -230,10 +230,11 @@ flutter_project_cli \
 
 (On Windows without PATH setup: use `& "$env:LOCALAPPDATA\Pub\Cache\bin\flutter_project_cli.bat"` or `dart pub global run flutter_project_cli`.)
 
-The CLI copies the template, skips build/cache/git files, renames Dart package
+The CLI supports interactive prompting (run `flutter_project_cli` with no arguments)
+or flags. It copies the template, skips build/cache/git files, renames Dart package
 imports, Android namespace/applicationId, Kotlin package folders, iOS bundle
-identifiers, visible template names, and initializes a new git repository with
-an initial commit.
+identifiers, visible template names, runs `flutter pub get`, `build_runner`,
+`flutter test`, and initializes a new git repository with an initial commit.
 
 ## Validation Checklist
 

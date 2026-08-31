@@ -10,15 +10,19 @@ const _templateKebabName = 'flutter-bloc-app-template';
 
 Future<void> runTemplateCli(List<String> args) async {
   late final _Options options;
-  try {
-    options = _Options.parse(args);
-  } on FormatException catch (error) {
-    stderr
-      ..writeln(error.message)
-      ..writeln('');
-    _printUsage();
-    exitCode = 64;
-    return;
+  if (args.isEmpty) {
+    options = _promptForOptions();
+  } else {
+    try {
+      options = _Options.parse(args);
+    } on FormatException catch (error) {
+      stderr
+        ..writeln(error.message)
+        ..writeln('');
+      _printUsage();
+      exitCode = 64;
+      return;
+    }
   }
 
   if (options.help) {
@@ -56,25 +60,42 @@ Future<void> runTemplateCli(List<String> args) async {
     output.deleteSync(recursive: true);
   }
 
+  stdout.writeln('\nGenerating ${options.projectName} in ${output.path}...');
   _copyDirectory(source, output);
   _replaceText(output, options);
   _removeTemplateOnlyPubspecEntries(output);
   _sortDartImports(output);
   _moveKotlinPackages(output, options.packageName!);
 
+  if (!options.skipSetup) {
+    _runStep('flutter pub get', 'flutter', ['pub', 'get'], output);
+    _runStep(
+      'dart run build_runner build --delete-conflicting-outputs',
+      'dart',
+      ['run', 'build_runner', 'build', '--delete-conflicting-outputs'],
+      output,
+    );
+    _runStep('flutter test', 'flutter', ['test'], output);
+  }
+
   final gitInitialized = !options.noGit && _initGitRepo(output);
 
-  stdout.writeln('Created ${options.projectName} at ${output.path}');
+  stdout
+    ..writeln('\n==================================================')
+    ..writeln('🎉 Project "${options.projectName}" is ready!')
+    ..writeln('==================================================');
   if (gitInitialized) {
-    stdout.writeln('Initialized git repository with initial commit.');
+    stdout.writeln('✓ Initialized git repository with initial commit.');
   }
   stdout
-    ..writeln('')
-    ..writeln('Next commands:')
+    ..writeln('\nNext commands to run your app:')
     ..writeln('  cd ${options.output}')
-    ..writeln('  flutter pub get')
-    ..writeln('  dart run build_runner build --delete-conflicting-outputs')
     ..writeln('  flutter run -t lib/main_dev.dart --flavor dev')
+    ..writeln('')
+    ..writeln('Flavors:')
+    ..writeln('  flutter run -t lib/main_dev.dart --flavor dev   # Dev')
+    ..writeln('  flutter run -t lib/main_qa.dart --flavor qa     # QA')
+    ..writeln('  flutter run -t lib/main_prod.dart --flavor prod # Production')
     ..writeln('')
     ..writeln('AI Agent / Flutter MCP Toolkit Setup (Optional):')
     ..writeln('  1. Install flutter-mcp-toolkit binary (macOS/Linux):')
@@ -105,11 +126,10 @@ void _printUsage() {
   stdout.writeln('''
 Create a new Flutter project from this template.
 
-Install or update from GitHub:
-  dart pub global activate --source git \\
-    https://github.com/xeron56/flutter-project-cli.git
+Interactive mode (run without arguments):
+  flutter_project_cli
 
-Usage:
+Non-interactive usage:
   flutter_project_cli \\
     --project-name my_app \\
     --package-name com.example.my_app \\
@@ -120,6 +140,7 @@ Options:
   --package-name   Native package id, for example com.example.my_app.
   --output         Target directory (for example my_app).
   --force          Delete the output directory first if it exists.
+  --skip-setup     Skip running flutter pub get, build_runner, and test.
   --no-git         Skip git repository initialization and initial commit.
   --help           Print this help.
 ''');
@@ -420,6 +441,110 @@ bool _initGitRepo(Directory root) {
   }
 }
 
+void _runStep(
+  String description,
+  String executable,
+  List<String> arguments,
+  Directory workingDirectory,
+) {
+  stdout.writeln('\n==> Running $description...');
+  final result = Process.runSync(
+    executable,
+    arguments,
+    workingDirectory: workingDirectory.path,
+    runInShell: true,
+  );
+  if (result.stdout != null) {
+    final out = result.stdout.toString().trim();
+    if (out.isNotEmpty) stdout.writeln(out);
+  }
+  if (result.exitCode != 0) {
+    if (result.stderr != null) {
+      final err = result.stderr.toString().trim();
+      if (err.isNotEmpty) stderr.writeln(err);
+    }
+    stdout.writeln(
+      '⚠️  Step "$description" finished with code ${result.exitCode}.',
+    );
+  }
+}
+
+_Options _promptForOptions() {
+  stdout
+    ..writeln('========================================')
+    ..writeln('  Flutter Project Generator')
+    ..writeln('========================================\n');
+
+  final projectName = _prompt(
+    'App name (snake_case)',
+    defaultValue: 'my_app',
+    validator: RegExp(r'^[a-z][a-z0-9_]*$'),
+    errorText: 'App name must be snake_case (e.g. my_app).',
+  );
+
+  final orgInput = _prompt(
+    'Organization / package middle name '
+    '(e.g. example -> com.example.$projectName)',
+    defaultValue: 'example',
+    validator: RegExp(r'^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*$'),
+    errorText: 'Invalid package name or identifier.',
+  );
+
+  final String packageName;
+  if (orgInput.contains('.')) {
+    packageName = orgInput;
+  } else {
+    packageName = 'com.$orgInput.$projectName';
+  }
+
+  final output = _prompt(
+    'Target directory',
+    defaultValue: projectName,
+  );
+
+  final runSetup = _promptBool(
+    'Run initial setup (flutter pub get, build_runner, flutter test)?',
+    defaultValue: true,
+  );
+
+  return _Options(
+    projectName: projectName,
+    packageName: packageName,
+    output: output,
+    skipSetup: !runSetup,
+  );
+}
+
+String _prompt(
+  String message, {
+  required String defaultValue,
+  RegExp? validator,
+  String? errorText,
+}) {
+  while (true) {
+    stdout.write('$message [$defaultValue]: ');
+    final input = stdin.readLineSync()?.trim() ?? '';
+    final value = input.isEmpty ? defaultValue : input;
+    if (validator != null && !validator.hasMatch(value)) {
+      stdout.writeln(errorText ?? 'Invalid input format.');
+      continue;
+    }
+    return value;
+  }
+}
+
+bool _promptBool(String message, {required bool defaultValue}) {
+  final defaultHint = defaultValue ? 'Y/n' : 'y/N';
+  while (true) {
+    stdout.write('$message ($defaultHint): ');
+    final input = stdin.readLineSync()?.trim().toLowerCase() ?? '';
+    if (input.isEmpty) return defaultValue;
+    if (input == 'y' || input == 'yes') return true;
+    if (input == 'n' || input == 'no') return false;
+    stdout.writeln('Please enter "y" or "n".');
+  }
+}
+
 class _Options {
   const _Options({
     this.projectName,
@@ -427,6 +552,7 @@ class _Options {
     this.output,
     this.force = false,
     this.noGit = false,
+    this.skipSetup = false,
     this.help = false,
   });
 
@@ -435,6 +561,7 @@ class _Options {
   final String? output;
   final bool force;
   final bool noGit;
+  final bool skipSetup;
   final bool help;
 
   static _Options parse(List<String> args) {
@@ -443,6 +570,7 @@ class _Options {
     String? output;
     var force = false;
     var noGit = false;
+    var skipSetup = false;
     var help = false;
 
     for (var i = 0; i < args.length; i++) {
@@ -458,6 +586,9 @@ class _Options {
           force = true;
         case '--no-git':
           noGit = true;
+        case '--skip-setup':
+        case '--no-setup':
+          skipSetup = true;
         case '--help':
         case '-h':
           help = true;
@@ -472,6 +603,7 @@ class _Options {
       output: output,
       force: force,
       noGit: noGit,
+      skipSetup: skipSetup,
       help: help,
     );
   }

@@ -62,10 +62,26 @@ flutter pub global activate --source git \
 
 ### 2. Generate a New Project
 
-Run the generator in whichever directory you want your new app created:
+#### Interactive Mode (Recommended)
+Simply run `flutter_project_cli` without arguments. It interactively prompts for:
+1. **App Name** (e.g. `my_app`)
+2. **Organization / Package Middle Name** (e.g. `example` -> `com.example.my_app`)
+3. **Target Directory** (defaults to app name)
+4. **Automated Setup** (`flutter pub get`, `build_runner`, `flutter test`, and `git init`)
 
-#### Windows (Command Prompt / PowerShell)
-If Pub cache is in your `PATH` (typically `%LOCALAPPDATA%\Pub\Cache\bin`):
+```bash
+flutter_project_cli
+```
+
+*(On Windows without PATH: `& "$env:LOCALAPPDATA\Pub\Cache\bin\flutter_project_cli.bat"` or `dart pub global run flutter_project_cli`)*
+*(On macOS/Linux without PATH: `"$HOME/.pub-cache/bin/flutter_project_cli"`)*
+
+---
+
+#### Non-Interactive Mode (With Flags)
+
+##### Windows (Command Prompt / PowerShell)
+If Pub cache is in your `PATH`:
 ```bash
 flutter_project_cli \
   --project-name my_app \
@@ -93,7 +109,7 @@ dart pub global run flutter_project_cli `
 "%LOCALAPPDATA%\Pub\Cache\bin\flutter_project_cli.bat" --project-name my_app --package-name com.example.my_app --output my_app
 ```
 
-#### macOS / Linux
+##### macOS / Linux
 If Pub cache is in your `PATH` (`$HOME/.pub-cache/bin`):
 ```bash
 flutter_project_cli \
@@ -117,10 +133,11 @@ Or run directly without PATH configuration:
 --package-name   Native package id, for example com.example.my_app
 --output         Target directory for the generated project (for example my_app in the current directory)
 --force          Replace output directory if it already exists
+--skip-setup     Skip running flutter pub get, build_runner, and flutter test
 --no-git         Skip initializing a git repository and initial commit
 ```
 
-The CLI automatically initializes a new `git` repository and creates an initial commit for your new project (unless `--no-git` is passed).
+The CLI automatically runs `flutter pub get`, code generation (`build_runner`), `flutter test`, and initializes a fresh `git` repository with an initial commit so your new app is immediately ready to run!
 
 ### Adding Pub Cache Executables to PATH (Recommended)
 
@@ -130,13 +147,10 @@ The CLI automatically initializes a new `git` repository and creates an initial 
   export PATH="$PATH:$HOME/.pub-cache/bin"
   ```
 
-### 3. Get Started with Your New App
+### 3. Run Your New App
 
 ```bash
 cd my_app
-flutter pub get
-dart run build_runner build --delete-conflicting-outputs
-flutter test
 flutter run -t lib/main_dev.dart --flavor dev
 ```
 
