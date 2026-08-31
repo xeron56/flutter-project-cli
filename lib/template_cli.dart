@@ -62,11 +62,16 @@ Future<void> runTemplateCli(List<String> args) async {
   _sortDartImports(output);
   _moveKotlinPackages(output, options.packageName!);
 
+  final gitInitialized = !options.noGit && _initGitRepo(output);
+
+  stdout.writeln('Created ${options.projectName} at ${output.path}');
+  if (gitInitialized) {
+    stdout.writeln('Initialized git repository with initial commit.');
+  }
   stdout
-    ..writeln('Created ${options.projectName} at ${output.path}')
     ..writeln('')
     ..writeln('Next commands:')
-    ..writeln('  cd ${output.path}')
+    ..writeln('  cd ${options.output}')
     ..writeln('  flutter pub get')
     ..writeln('  dart run build_runner build --delete-conflicting-outputs')
     ..writeln('  flutter run -t lib/main_dev.dart --flavor dev')
@@ -115,6 +120,7 @@ Options:
   --package-name   Native package id, for example com.example.my_app.
   --output         Target directory (for example my_app).
   --force          Delete the output directory first if it exists.
+  --no-git         Skip git repository initialization and initial commit.
   --help           Print this help.
 ''');
 }
@@ -169,7 +175,17 @@ bool _isInside(Directory child, Directory parent) {
       childPath.startsWith('$parentPath${Platform.pathSeparator}');
 }
 
-String _normalizedPath(String path) => Directory(path).absolute.path;
+String _normalizedPath(String path) {
+  var resolved =
+      Uri.file(Directory(path).absolute.path).normalizePath().toFilePath();
+  if (Platform.isWindows) {
+    resolved = resolved.toLowerCase();
+  }
+  if (resolved.endsWith(Platform.pathSeparator) && resolved.length > 1) {
+    resolved = resolved.substring(0, resolved.length - 1);
+  }
+  return resolved;
+}
 
 void _replaceText(Directory root, _Options options) {
   final projectName = options.projectName!;
@@ -358,12 +374,59 @@ String _extension(String path) {
   return name.substring(dot).toLowerCase();
 }
 
+bool _initGitRepo(Directory root) {
+  try {
+    final init = Process.runSync(
+      'git',
+      ['init'],
+      workingDirectory: root.path,
+      runInShell: true,
+    );
+    if (init.exitCode != 0) return false;
+
+    final add = Process.runSync(
+      'git',
+      ['add', '-A'],
+      workingDirectory: root.path,
+      runInShell: true,
+    );
+    if (add.exitCode != 0) return false;
+
+    var commit = Process.runSync(
+      'git',
+      ['commit', '-m', 'feat: initial project setup from template'],
+      workingDirectory: root.path,
+      runInShell: true,
+    );
+    if (commit.exitCode != 0) {
+      commit = Process.runSync(
+        'git',
+        [
+          '-c',
+          'user.name=Flutter Project CLI',
+          '-c',
+          'user.email=cli@flutter.dev',
+          'commit',
+          '-m',
+          'feat: initial project setup from template',
+        ],
+        workingDirectory: root.path,
+        runInShell: true,
+      );
+    }
+    return commit.exitCode == 0;
+  } catch (_) {
+    return false;
+  }
+}
+
 class _Options {
   const _Options({
     this.projectName,
     this.packageName,
     this.output,
     this.force = false,
+    this.noGit = false,
     this.help = false,
   });
 
@@ -371,6 +434,7 @@ class _Options {
   final String? packageName;
   final String? output;
   final bool force;
+  final bool noGit;
   final bool help;
 
   static _Options parse(List<String> args) {
@@ -378,6 +442,7 @@ class _Options {
     String? packageName;
     String? output;
     var force = false;
+    var noGit = false;
     var help = false;
 
     for (var i = 0; i < args.length; i++) {
@@ -391,6 +456,8 @@ class _Options {
           output = _readValue(args, ++i, arg);
         case '--force':
           force = true;
+        case '--no-git':
+          noGit = true;
         case '--help':
         case '-h':
           help = true;
@@ -404,6 +471,7 @@ class _Options {
       packageName: packageName,
       output: output,
       force: force,
+      noGit: noGit,
       help: help,
     );
   }

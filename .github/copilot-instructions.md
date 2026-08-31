@@ -232,7 +232,8 @@ flutter_project_cli \
 
 The CLI copies the template, skips build/cache/git files, renames Dart package
 imports, Android namespace/applicationId, Kotlin package folders, iOS bundle
-identifiers, and visible template names.
+identifiers, visible template names, and initializes a new git repository with
+an initial commit.
 
 ## Validation Checklist
 

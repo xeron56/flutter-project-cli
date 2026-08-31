@@ -117,7 +117,10 @@ Or run directly without PATH configuration:
 --package-name   Native package id, for example com.example.my_app
 --output         Target directory for the generated project (for example my_app in the current directory)
 --force          Replace output directory if it already exists
+--no-git         Skip initializing a git repository and initial commit
 ```
+
+The CLI automatically initializes a new `git` repository and creates an initial commit for your new project (unless `--no-git` is passed).
 
 ### Adding Pub Cache Executables to PATH (Recommended)
 
