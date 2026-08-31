@@ -21,13 +21,14 @@ calls before real backend details are added.
 | Localization | ARB + `intl_utils` |
 | Flavors | `dev`, `qa`, `prod` entrypoints and native configs |
 | Testing | Flutter test setup with a connectivity banner test |
+| AI Agent / MCP | `mcp_toolkit` binding, MCP configs (`mcp.json`, `.cursor/`), custom runtime tools |
 
 ## Structure
 
 ```text
 lib/
-  app/                         App shell, localization, lifecycle
-  app_runner.dart              Error boundary, DI init, runApp
+  app/                         App shell, localization, lifecycle, MCP tools
+  app_runner.dart              Error boundary, DI init, MCP binding, runApp
   bloc/theme/                  Global ThemeCubit
   config/                      AppConfig, Environment, BuildType, FeatureFlags
   data/
@@ -94,6 +95,19 @@ cd ../my_app
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 flutter test
+flutter run -t lib/main_dev.dart --flavor dev
+```
+
+### AI Agent / MCP Toolkit Setup (Optional)
+```bash
+# 1. Install flutter-mcp-toolkit binary (macOS/Linux):
+curl -fsSL https://raw.githubusercontent.com/Arenukvern/mcp_flutter/main/install.sh | bash
+
+# 2. Connect AI agent (Antigravity is preconfigured in .agents/skills/ & mcp.json):
+# For Codex:
+flutter-mcp-toolkit init codex
+# For Cursor / Claude Code / Cline / All:
+flutter-mcp-toolkit init all
 ```
 
 ## Run This Template
@@ -111,6 +125,40 @@ flutter run -t lib/main_prod.dart --flavor prod
 ```
 
 VS Code launch configs are already set up in `.vscode/launch.json`.
+
+## AI Agent / Flutter MCP Toolkit ([mcp_flutter](https://github.com/Arenukvern/mcp_flutter))
+
+This template includes [mcp_flutter](https://github.com/Arenukvern/mcp_flutter) (`mcp_toolkit`) support out-of-the-box for AI Agent Driven Development (**Antigravity**, **Codex**, Cursor, Claude Code, Cline, etc.).
+
+### 1. Install CLI & Binary (macOS/Linux or Windows)
+```bash
+# macOS/Linux:
+curl -fsSL https://raw.githubusercontent.com/Arenukvern/mcp_flutter/main/install.sh | bash
+
+# Or via Docker:
+# ghcr.io/arenukvern/flutter-mcp-toolkit:latest
+```
+
+### 2. Connect Your AI Agent
+- **Antigravity**: MCP config and skills are bundled in `mcp.json` and `.agents/skills/` (automatically discovered).
+- **Codex**: Run `flutter-mcp-toolkit init codex` (or `codex plugin marketplace add Arenukvern/mcp_flutter`).
+- **Cursor / Claude Code / Others**: Run `flutter-mcp-toolkit init all`.
+
+### 3. Run and Drive App with AI
+Start the app in debug mode:
+```bash
+flutter run -t lib/main_dev.dart --flavor dev
+```
+AI agents can now inspect semantic snapshots, tap widgets, fill inputs, evaluate Dart expressions, trigger hot reload, and invoke in-app custom tools.
+
+### 4. Expose In-App MCP Tools
+Register custom domain actions or debug helpers for AI agents in `lib/app/agent_mcp_tools.dart`:
+```dart
+void registerAppMcpTools() {
+  if (!kDebugMode) return;
+  // MCPToolkitBinding.instance.addEntries([...]);
+}
+```
 
 ## Add a Feature
 

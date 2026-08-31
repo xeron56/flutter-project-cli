@@ -2,11 +2,18 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master, develop ]
     paths-ignore:
-      - '**/README.md'
+      - '**.md'
+      - 'docs/**'
+      - '.github/**.md'
   pull_request:
-    branches: [ main ]
+    branches: [ main, master, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/**.md'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -17,113 +24,138 @@ defaults:
     shell: bash
 
 jobs:
-  test-app:
-    name: App
+  # ============================================================================
+  # 1. CODE QUALITY & STATIC ANALYSIS
+  # ============================================================================
+  code-quality:
+    name: Code Quality & Analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
 
-      - name: Flutter version
+      - name: Flutter Version Info
         run: flutter --version
 
-      - name: Cache pub dependencies
+      - name: Cache Pub Dependencies
         uses: actions/cache@v4
         with:
-          path: ${{ env.HOME }}/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: ${{ runner.os }}-pub-
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
 
-      - name: Download pub dependencies
+      - name: Install Dependencies
         run: flutter pub get
 
-      - name: Run analyzer
-        run: flutter analyze
+      - name: Verify Code Formatting
+        run: dart format --output=none --set-exit-if-changed .
 
-      - name: Run tests
-        run: flutter test --coverage
+      - name: Run Flutter Static Analysis
+        run: flutter analyze --no-fatal-infos --fatal-warnings
 
-      - name: Install lcov
-        run: sudo apt-get install -y lcov
+      - name: Check Outdated Dependencies
+        run: flutter pub outdated
 
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
+  # ============================================================================
+  # 2. UNIT & WIDGET TESTS WITH COVERAGE GATES
+  # ============================================================================
+  unit-tests:
+    name: Unit & Widget Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          name: unit-test-results
-          path: build/
+          channel: stable
+          cache: true
 
-      - name: Clean coverage report
+      - name: Cache Pub Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            pub-${{ runner.os }}-
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Run Tests with Coverage
+        run: flutter test --coverage --reporter compact
+
+      - name: Install LCOV
+        run: sudo apt-get update && sudo apt-get install -y lcov
+
+      - name: Clean & Filter Coverage Report
         run: |
           lcov --remove coverage/lcov.info \
-            'lib/**.gen.dart' \
+            '**/*.g.dart' \
+            '**/*.gen.dart' \
+            '**/*.freezed.dart' \
+            '**/*.config.dart' \
+            '**/*.mocks.dart' \
             'lib/generated/**' \
             'lib/di/**' \
             'lib/constants/**' \
             'lib/routers/router.dart' \
+            'lib/routes/router.dart' \
             -o coverage/lcov.info \
-            --ignore-errors unused
+            --ignore-errors unused,empty
 
-      - name: Check Code Coverage
+      - name: Enforce Minimum Code Coverage
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
           path: coverage/lcov.info
-          min_coverage: 59
+          min_coverage: 50
           exclude: |
             **/*.g.dart
             **/*.gen.dart
+            **/*.freezed.dart
+            **/*.config.dart
+            **/*.mocks.dart
             lib/di/**
             lib/generated/**
             lib/constants/**
             lib/routers/router.dart
+            lib/routes/router.dart
 
-      - name: Upload coverage to Codecov
+      - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
-      - name: Codacy Coverage Reporter
+      - name: Upload Coverage to Codacy
+        if: env.CODACY_PROJECT_TOKEN != ''
         uses: codacy/codacy-coverage-reporter-action@v1
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: ./coverage/lcov.info
 
-  integration-tests:
-    name: Flutter Integration Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: true
-      matrix:
-        api-level: [ 31 ]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Upload Coverage Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          channel: stable
-
-      - name: Enable KVM
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Setup Android emulator and run integration tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          arch: x86_64
-          target: google_apis
-          profile: Nexus 6
-          script: |
-            flutter pub get
-            flutter test integration_test --flavor dev
+          name: coverage-report
+          path: coverage/

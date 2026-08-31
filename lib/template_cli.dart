@@ -68,7 +68,22 @@ Future<void> runTemplateCli(List<String> args) async {
     ..writeln('Next commands:')
     ..writeln('  cd ${output.path}')
     ..writeln('  flutter pub get')
-    ..writeln('  dart run build_runner build --delete-conflicting-outputs');
+    ..writeln('  dart run build_runner build --delete-conflicting-outputs')
+    ..writeln('  flutter run -t lib/main_dev.dart --flavor dev')
+    ..writeln('')
+    ..writeln('AI Agent / Flutter MCP Toolkit Setup (Optional):')
+    ..writeln('  1. Install flutter-mcp-toolkit binary (macOS/Linux):')
+    ..writeln(
+      '     curl -fsSL https://raw.githubusercontent.com/'
+      'Arenukvern/mcp_flutter/main/install.sh | bash',
+    )
+    ..writeln('  2. (mcp_toolkit is already integrated in this template!)')
+    ..writeln('  3. AI Agent skills & MCP configuration:')
+    ..writeln(
+      '     - Antigravity: preconfigured in .agents/skills/ & mcp.json',
+    )
+    ..writeln('     - Codex: flutter-mcp-toolkit init codex')
+    ..writeln('     - Others: flutter-mcp-toolkit init all');
 }
 
 Future<Directory> _templateRoot() async {

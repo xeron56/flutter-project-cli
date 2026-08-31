@@ -15,6 +15,7 @@ Failure mapErrorToFailure(Object error, [StackTrace? stack]) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
+      case DioExceptionType.transformTimeout:
         return TimeoutFailure(cause: error);
       case DioExceptionType.connectionError:
         return NetworkFailure(cause: error);

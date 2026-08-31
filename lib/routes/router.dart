@@ -9,7 +9,10 @@ abstract final class AppRoutes {
   static const settings = '/settings';
 }
 
+final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'rootNavigator');
+
 final appRouter = GoRouter(
+  navigatorKey: rootNavigatorKey,
   initialLocation: AppRoutes.home,
   debugLogDiagnostics: kDebugMode,
   routes: [

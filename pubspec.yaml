@@ -74,6 +74,9 @@ dependencies:
   url_launcher: ^6.3.2
   provider: ^6.1.5
 
+  # AI Agent / MCP
+  mcp_toolkit: ^5.1.0
+
   flutter_localizations:
     sdk: flutter
 

@@ -32,14 +32,15 @@ unless the user explicitly asks for a real feature.
 - `get_it` + `injectable` for dependency injection
 - `shared_preferences` for simple local preferences
 - `connectivity_plus` for the global offline banner
+- `mcp_toolkit` for AI Agent MCP runtime bridging (Arenukvern/mcp_flutter)
 - ARB + `intl_utils`/Flutter localization generation
 
 ## Project Shape
 
 ```text
 lib/
-  app/                         App shell, localization delegates, lifecycle
-  app_runner.dart              Bootstraps Flutter, DI, error reporting
+  app/                         App shell, localization delegates, lifecycle, agent MCP tools
+  app_runner.dart              Bootstraps Flutter, DI, MCP binding, error reporting
   bloc/theme/                  Global ThemeCubit and AppTheme enum
   config/                      AppConfig, Environment, BuildType, FeatureFlags
   constants/                   Small shared constants and Material icon aliases
@@ -267,8 +268,8 @@ flutter analyze
 
 ## Notes For Specific Agents
 
-- Codex: use repository tools and terminal checks directly; keep edits small
-  and verify with `flutter analyze`/tests.
+- Antigravity: leverage preconfigured `.agents/skills/` (guide, inspect, control, debug) and `mcp.json` to inspect live state and drive Flutter UI.
+- Codex: install plugin via `flutter-mcp-toolkit init codex` (or `codex plugin marketplace add Arenukvern/mcp_flutter`).
 - Claude: follow the file structure and result/error patterns exactly; do not
   invent alternative state management or service layers.
 - GitHub Copilot/Copilot Chat: treat this file as the project source of truth

@@ -3,11 +3,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc_app_template/app/agent_mcp_tools.dart';
 import 'package:flutter_bloc_app_template/app/app.dart';
 import 'package:flutter_bloc_app_template/config/app_config.dart';
 import 'package:flutter_bloc_app_template/config/environment.dart' as env;
 import 'package:flutter_bloc_app_template/di/di_container.dart';
 import 'package:flutter_bloc_app_template/di/di_initializer.dart';
+import 'package:flutter_bloc_app_template/routes/router.dart';
+import 'package:mcp_toolkit/mcp_toolkit.dart';
 
 /// Boots the app. Every flavor's `main_*.dart` ends with `run()` after
 /// initializing the `Environment` singleton.
@@ -32,6 +35,14 @@ Future<void> run([
 
     final buildType = env.Environment<AppConfig>.instance().buildType.name;
     await initDI(diContainer, buildType);
+
+    if (kDebugMode) {
+      MCPToolkitBinding.instance
+        ..initialize()
+        ..initializeFlutterToolkit()
+        ..navigatorKey = rootNavigatorKey;
+      registerAppMcpTools();
+    }
 
     runApp(const App());
   }, _reportError);

@@ -66,5 +66,9 @@ integration_test:
 screenshot_test:
 	flutter drive --driver=test_driver/integration_test.dart --target=screenshot_test/settings_screenshot_test.dart --flavor dev
 
-# upgrade_deps:
-#     flutter pub upgrade --major-versions
+# MCP Toolkit (Arenukvern/mcp_flutter)
+mcp_doctor:
+	flutter-mcp-toolkit doctor --json
+
+mcp_init:
+	flutter-mcp-toolkit init all

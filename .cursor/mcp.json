@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "flutter-mcp-toolkit": {
+      "command": "flutter-mcp-toolkit",
+      "args": [
+        "--dynamics",
+        "--save-images"
+      ]
+    }
+  }
+}
