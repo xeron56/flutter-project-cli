@@ -180,6 +180,8 @@ bool _shouldSkip(String name, String path) {
     '.packages',
     '.flutter-plugins',
     '.flutter-plugins-dependencies',
+    '.flutter_mcp',
+    '.mcp_screenshots',
     'bin',
     'build',
     'coverage',
@@ -189,20 +191,28 @@ bool _shouldSkip(String name, String path) {
   };
 
   if (skippedNames.contains(name)) return true;
+
+  final normalized = path.replaceAll(r'\', '/');
+
   final isCliSource =
       (name == 'template_cli.dart' || name == 'project_readme_template.dart') &&
-          path.contains(
-            '${Platform.pathSeparator}lib${Platform.pathSeparator}',
-          );
+          normalized.contains('/lib/');
   if (isCliSource) return true;
 
-  final isCliSrcDir = name == 'src' &&
-      path.contains(
-        '${Platform.pathSeparator}lib${Platform.pathSeparator}src',
-      );
+  final isCliSrcDir = name == 'src' && normalized.contains('/lib/src');
   if (isCliSrcDir) return true;
+
+  final isCliTest =
+      (name == 'template_cli_test.dart' ||
+          name == 'project_readme_template_test.dart') &&
+          normalized.contains('/test/');
+  if (isCliTest) return true;
+
+  final isCliTestDir = name == 'cli' && normalized.contains('/test/cli');
+  if (isCliTestDir) return true;
+
   if (name.endsWith('.iml')) return true;
-  if (path.contains('${Platform.pathSeparator}.kotlin')) return true;
+  if (normalized.contains('/.kotlin')) return true;
   return false;
 }
 

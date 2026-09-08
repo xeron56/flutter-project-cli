@@ -80,6 +80,46 @@ void main() {
       );
       expect(cliSrcDir.existsSync(), isFalse);
 
+      // Verify CLI-specific tests are not copied to the generated app
+      final cliTestFile = File(
+        '${targetDir.path}${Platform.pathSeparator}test'
+        '${Platform.pathSeparator}template_cli_test.dart',
+      );
+      expect(cliTestFile.existsSync(), isFalse);
+
+      final readmeTestFile = File(
+        '${targetDir.path}${Platform.pathSeparator}test'
+        '${Platform.pathSeparator}project_readme_template_test.dart',
+      );
+      expect(readmeTestFile.existsSync(), isFalse);
+
+      // Verify app tests are preserved in the generated app
+      final widgetTestFile = File(
+        '${targetDir.path}${Platform.pathSeparator}test'
+        '${Platform.pathSeparator}widget_test.dart',
+      );
+      expect(widgetTestFile.existsSync(), isTrue);
+
+      final connectivityTestFile = File(
+        '${targetDir.path}${Platform.pathSeparator}test'
+        '${Platform.pathSeparator}widgets'
+        '${Platform.pathSeparator}connectivity_banner_test.dart',
+      );
+      expect(connectivityTestFile.existsSync(), isTrue);
+
+      // Verify no remaining tests import missing CLI files
+      final generatedTestFiles = Directory(
+        '${targetDir.path}${Platform.pathSeparator}test',
+      )
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.dart'));
+      for (final testFile in generatedTestFiles) {
+        final content = testFile.readAsStringSync();
+        expect(content, isNot(contains('template_cli.dart')));
+        expect(content, isNot(contains('project_readme_template.dart')));
+      }
+
       // Verify pubspec.yaml executables entry was stripped
       final pubspecFile = File(
         '${targetDir.path}${Platform.pathSeparator}pubspec.yaml',
