@@ -272,10 +272,9 @@ flutter analyze
 
 ## Notes For Specific Agents
 
-- Antigravity: leverage preconfigured `.agents/skills/` (guide, inspect, control, debug) and `mcp.json` to inspect live state and drive Flutter UI.
-- Codex: install plugin via `flutter-mcp-toolkit init codex` (or `codex plugin marketplace add Arenukvern/mcp_flutter`).
-- Claude: follow the file structure and result/error patterns exactly; do not
-  invent alternative state management or service layers.
+- Antigravity: leverage preconfigured `.agents/skills/` (guide, inspect, control, debug), `AGENTS.md` / `GEMINI.md`, and `mcp.json` to inspect live state and drive Flutter UI.
+- Codex: see `CODEX.md` / `AGENTS.md` and install plugin via `flutter-mcp-toolkit init codex` (or `codex plugin marketplace add Arenukvern/mcp_flutter`).
+- Claude: see `CLAUDE.md`; follow the file structure and result/error patterns exactly; do not invent alternative state management or service layers.
 - GitHub Copilot/Copilot Chat: treat this file as the project source of truth
   for generated suggestions.
 - Cursor/Windsurf/Gemini: prefer existing files as examples before creating new
