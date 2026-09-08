@@ -138,3 +138,7 @@ coverage/
 !/dev/ci/**/Gemfile.lock
 .fvm
 **/android/app/.cxx/
+
+# Flutter MCP Toolkit
+.flutter_mcp/
+.mcp_screenshots/

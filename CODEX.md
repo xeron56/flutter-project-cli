@@ -1,4 +1,4 @@
-# Dohatec Dailyreport AI Agent Guidelines & Workflow
+# AI Agent Guidelines & Workflow
 # Reference-Image-Driven Flutter UI Implementation & Visual Perfection Skill
 
 This document extends the base `.github/copilot-instructions.md` to provide detailed workflows for AI agents (Antigravity, Codex, Claude, Cursor, Windsurf, Gemini, etc.) working within this Flutter repository.

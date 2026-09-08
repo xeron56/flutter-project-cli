@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:flutter_bloc_app_template/src/project_readme_template.dart';
+
+export 'package:flutter_bloc_app_template/src/project_readme_template.dart';
+
 const _templateProjectName = 'flutter_bloc_app_template';
 const _templateAndroidPackage = 'dev.shtanko.flutter_bloc_app_template';
 const _templateIosBundleId = 'com.shtanko.template-flutter';
@@ -64,6 +68,7 @@ Future<void> runTemplateCli(List<String> args) async {
   _copyDirectory(source, output);
   _replaceText(output, options);
   _removeTemplateOnlyPubspecEntries(output);
+  _writeProjectReadme(output, options);
   _sortDartImports(output);
   _moveKotlinPackages(output, options.packageName!);
 
@@ -113,13 +118,17 @@ Future<void> runTemplateCli(List<String> args) async {
 }
 
 Future<Directory> _templateRoot() async {
-  final libraryUri = await Isolate.resolvePackageUri(
-    Uri.parse('package:flutter_bloc_app_template/template_cli.dart'),
-  );
-  if (libraryUri == null || !libraryUri.isScheme('file')) {
+  try {
+    final libraryUri = await Isolate.resolvePackageUri(
+      Uri.parse('package:flutter_bloc_app_template/template_cli.dart'),
+    );
+    if (libraryUri == null || !libraryUri.isScheme('file')) {
+      return Directory.current.absolute;
+    }
+    return File.fromUri(libraryUri).parent.parent.absolute;
+  } catch (_) {
     return Directory.current.absolute;
   }
-  return File.fromUri(libraryUri).parent.parent.absolute;
 }
 
 void _printUsage() {
@@ -180,10 +189,18 @@ bool _shouldSkip(String name, String path) {
   };
 
   if (skippedNames.contains(name)) return true;
-  if (name == 'template_cli.dart' &&
-      path.contains('${Platform.pathSeparator}lib${Platform.pathSeparator}')) {
-    return true;
-  }
+  final isCliSource =
+      (name == 'template_cli.dart' || name == 'project_readme_template.dart') &&
+          path.contains(
+            '${Platform.pathSeparator}lib${Platform.pathSeparator}',
+          );
+  if (isCliSource) return true;
+
+  final isCliSrcDir = name == 'src' &&
+      path.contains(
+        '${Platform.pathSeparator}lib${Platform.pathSeparator}src',
+      );
+  if (isCliSrcDir) return true;
   if (name.endsWith('.iml')) return true;
   if (path.contains('${Platform.pathSeparator}.kotlin')) return true;
   return false;
@@ -243,12 +260,23 @@ void _removeTemplateOnlyPubspecEntries(Directory root) {
 
   final original = pubspec.readAsStringSync();
   final updated = original.replaceFirst(
-    RegExp(r'\nexecutables:\n  flutter_project_cli: flutter_project_cli\n'),
+    RegExp(r'\r?\nexecutables:\r?\n  flutter_project_cli: flutter_project_cli\r?\n'),
     '\n',
   );
   if (updated != original) {
     pubspec.writeAsStringSync(updated);
   }
+}
+
+void _writeProjectReadme(Directory root, _Options options) {
+  final readmeFile = File('${root.path}${Platform.pathSeparator}README.md');
+  final appTitle = _titleFromProjectName(options.projectName!);
+  final readmeContent = generateProjectReadme(
+    projectName: options.projectName!,
+    packageName: options.packageName!,
+    appTitle: appTitle,
+  );
+  readmeFile.writeAsStringSync(readmeContent);
 }
 
 void _sortDartImports(Directory root) {
