@@ -3,7 +3,7 @@ name: flutter-reference-ui-perfection
 description: Reference-image-driven Flutter UI implementation and visual perfection skill using Flutter MCP Toolkit. Use when the user provides reference screenshots or mockups to implement, match, improve, or visually verify Flutter UI.
 ---
 
-# Dohatec Dailyreport AI Agent Guidelines & Workflow
+# AI Agent Guidelines & Workflow
 # Reference-Image-Driven Flutter UI Implementation & Visual Perfection Skill
 
 This document extends the base `.github/copilot-instructions.md` to provide detailed workflows for AI agents (Antigravity, Codex, Claude, Cursor, Windsurf, Gemini, etc.) working within this Flutter repository.
